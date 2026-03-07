@@ -49,8 +49,8 @@ HTML_TEMPLATE = """
       --text: #1f2937;
       --muted: #6b7280;
       --good: #f59e0b;
-      --bad: #f59e0b;
-      --warn: #f59e0b;
+      --bad: #d946ef;
+      --warn: #d946ef;
       --line: #e5e7eb;
       --head: #f3f4f6;
       --shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
@@ -129,13 +129,17 @@ HTML_TEMPLATE = """
       font-weight: 800;
       line-height: 1.2;
       letter-spacing: -0.03em;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .mono {
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
-    .good, .bad, .warn { color: var(--orange); }
+    .good { color: var(--orange); }
+    .bad, .warn { color: var(--bad); }
     .neutral { color: var(--text); }
+    .magenta { color: var(--bad); }
     table {
       width: 100%;
       border-collapse: separate;
@@ -214,7 +218,7 @@ HTML_TEMPLATE = """
     }
     .bar-row {
       display: grid;
-      grid-template-columns: 84px 1fr 92px;
+      grid-template-columns: 84px 1fr 120px;
       gap: 10px;
       align-items: center;
       margin-bottom: 10px;
@@ -309,15 +313,15 @@ HTML_TEMPLATE = """
       </div>
       <div class="card">
         <div class="label">Win Rate 24h</div>
-        <div class="value mono {{ win_rate_class }}">{{ win_rate }}</div>
+        <div class="value mono magenta">{{ win_rate }}</div>
       </div>
       <div class="card">
         <div class="label">Profit Factor 24h</div>
-        <div class="value mono {{ profit_factor_class }}">{{ profit_factor }}</div>
+        <div class="value mono magenta">{{ profit_factor }}</div>
       </div>
       <div class="card">
         <div class="label">Fees 24h</div>
-        <div class="value mono {{ fees_class }}">{{ fees_24h }}</div>
+        <div class="value mono magenta">{{ fees_24h }}</div>
       </div>
     </div>
 
@@ -371,7 +375,7 @@ HTML_TEMPLATE = """
         <div class="bar-row">
           <div>{{ row.symbol }}</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ row.width }}%;"></div></div>
-          <div class="mono" style="color:#9a3412;">{{ row.text }}</div>
+          <div class="mono magenta">{{ row.text }}</div>
         </div>
         {% endfor %}
       </div>
@@ -380,12 +384,12 @@ HTML_TEMPLATE = """
         <div class="bar-row">
           <div>Ganadas</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ wins_pct }}%;"></div></div>
-          <div class="mono" style="color:#9a3412;">{{ wins_pct_text }}</div>
+          <div class="mono magenta">{{ wins_pct_text }}</div>
         </div>
         <div class="bar-row">
           <div>Perdidas</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ losses_pct }}%;"></div></div>
-          <div class="mono" style="color:#9a3412;">{{ losses_pct_text }}</div>
+          <div class="mono magenta">{{ losses_pct_text }}</div>
         </div>
       </div>
     </div>
@@ -574,7 +578,7 @@ def dashboard():
             "pnl_class": css_class(pnl_24h),
             "closed_trades_24h": closed_24h,
             "win_rate_text": fmt_pct(win_rate_24h),
-            "win_rate_class": css_class(win_rate_24h - 0.5),
+            "win_rate_class": 'magenta',
             "last_trade": {
                 "side": last_trade.get("side"),
                 "time": last_trade.get("time", "-"),
@@ -632,11 +636,11 @@ def dashboard():
         pnl30_class=css_class(summary.get("pnl_30d", 0)),
         closed_trades=summary.get("closed_trades_24h", 0),
         win_rate=fmt_pct(summary.get("win_rate_24h", 0)),
-        win_rate_class=css_class(float(summary.get("win_rate_24h", 0) or 0) - 0.5),
+        win_rate_class='magenta',
         profit_factor=fmt_num(summary.get("profit_factor_24h", 0)),
-        profit_factor_class="warn" if float(summary.get("profit_factor_24h", 0) or 0) >= 0 else "neutral",
+        profit_factor_class='magenta',
         fees_24h=fmt_signed_num(-(float(summary.get("fees_24h", 0) or 0)), f" {quote}"),
-        fees_class="warn" if float(summary.get("fees_24h", 0) or 0) >= 0 else "neutral",
+        fees_class='magenta',
         bots=safe_bots,
         pnl_bars=pnl_bars,
         wins_pct=wins_pct,
