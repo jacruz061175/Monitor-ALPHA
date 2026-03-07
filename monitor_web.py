@@ -230,7 +230,7 @@ HTML_TEMPLATE = """
         <tr>
           <td><strong>{{ bot.symbol }}</strong></td>
           <td>{{ bot.ready }}</td>
-          <td>{{ bot.Regime }}</td>
+          <td>{{ bot.regime if bot.regime else "RANGE" }}</td>
 
           <td>
           {% if bot.position == "LONG" %}
