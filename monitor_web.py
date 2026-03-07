@@ -48,7 +48,7 @@ HTML_TEMPLATE = """
       --text: #e8eef5;
       --muted: #99a7b5;
       --good: #27c93f;
-      --bad: #ff5f56;
+      --bad: #ff00ff;
       --warn: #f7c948;
       --line: #253240;
     }
