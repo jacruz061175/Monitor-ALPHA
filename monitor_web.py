@@ -230,7 +230,7 @@ HTML_TEMPLATE = """
         <tr>
           <td><strong>{{ bot.symbol }}</strong></td>
           <td>{{ bot.ready }}</td>
-          <td>{{ bot.Market }}</td>
+          <td>{{ bot.Regime }}</td>
 
           <td>
           {% if bot.position == "LONG" %}
@@ -333,7 +333,7 @@ def dashboard():
         safe_bots.append({
             "symbol": bot.get("symbol", "-"),
             "ready": bot.get("ready", "-"),
-            "Market": bot.get("Market", "-"),
+            "Regime": bot.get("Regime", "-"),
             "position": bot.get("position", "-"),
             "pnl_24h": bot.get("pnl_24h", 0),
             "pnl_24h_text": fmt_num(bot.get("pnl_24h", 0), f" {quote}"),
