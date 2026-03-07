@@ -195,9 +195,9 @@ HTML_TEMPLATE = """
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
-      border: 1px solid #fed7aa;
-      color: #9a3412;
-      background: #fff7ed;
+      border: 1px solid #d946ef;
+      color: #d946ef;
+      background: #fdf4ff;
     }
     .muted { color: var(--muted); }
     .panels-row {
@@ -702,7 +702,3 @@ def dashboard():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
-
-
-
