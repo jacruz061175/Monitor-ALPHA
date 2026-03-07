@@ -48,7 +48,7 @@ HTML_TEMPLATE = """
       --text: #e8eef5;
       --muted: #99a7b5;
       --good: #27c93f;
-      --bad: #ff00ff;
+      --bad: #ff5f56;
       --warn: #f7c948;
       --line: #253240;
     }
@@ -217,7 +217,7 @@ HTML_TEMPLATE = """
         <tr>
           <th>Moneda</th>
           <th>Ready</th>
-          <th>Market</th>
+          <th>Regime</th>
           <th>Posición</th>
           <th>PnL 24h</th>
           <th>Closed</th>
@@ -230,18 +230,8 @@ HTML_TEMPLATE = """
         <tr>
           <td><strong>{{ bot.symbol }}</strong></td>
           <td>{{ bot.ready }}</td>
-          <td>{{ bot.regime if bot.regime else "RANGE" }}</td>
-
-          <td>
-          {% if bot.position == "LONG" %}
-          Compró
-          {% elif bot.position == "SHORT" %}
-          Vendió
-          {% else %}
-          Sin posición
-          {% endif %}
-          </td>
-
+          <td>{{ bot.regime }}</td>
+          <td>{{ bot.position }}</td>
           <td class="{{ 'good' if (bot.pnl_24h or 0) > 0 else 'bad' if (bot.pnl_24h or 0) < 0 else 'neutral' }}">{{ bot.pnl_24h_text }}</td>
           <td>{{ bot.closed_trades_24h }}</td>
           <td>{{ bot.win_rate_text }}</td>
@@ -333,7 +323,7 @@ def dashboard():
         safe_bots.append({
             "symbol": bot.get("symbol", "-"),
             "ready": bot.get("ready", "-"),
-            "Regime": bot.get("Regime", "-"),
+            "regime": bot.get("regime", "-"),
             "position": bot.get("position", "-"),
             "pnl_24h": bot.get("pnl_24h", 0),
             "pnl_24h_text": fmt_num(bot.get("pnl_24h", 0), f" {quote}"),
