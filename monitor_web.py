@@ -36,7 +36,7 @@ HTML_TEMPLATE = """
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monitor de Bots</title>
+  <title>ALPHA MONITOR</title>
   <style>
     :root {
       --bg: #0b0f14;
@@ -160,7 +160,10 @@ HTML_TEMPLATE = """
       <div class="card">
         <div class="label">PnL 30d</div>
         <div class="value {{ pnl30_class }}">{{ pnl30 }}</div>
+
       </div>
+
+      <div class="stats-grid secondary">
       <div class="card">
         <div class="label">Closed trades 24h</div>
         <div class="value">{{ closed_trades }}</div>
