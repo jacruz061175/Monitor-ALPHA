@@ -102,7 +102,9 @@ HTML_TEMPLATE = """
       font-size: 14px;
     }
     .grid-primary,
-    .grid-secondary {
+    .grid-secondary,
+    .grid-tertiary,
+    .grid-quaternary {
       display: grid;
       gap: 14px;
       margin-bottom: 16px;
@@ -110,6 +112,8 @@ HTML_TEMPLATE = """
     }
     .grid-primary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .grid-secondary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-tertiary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-quaternary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .card {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -258,7 +262,7 @@ HTML_TEMPLATE = """
       font-size: 12px;
     }
     @media (max-width: 1100px) {
-      .grid-primary, .grid-secondary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-primary, .grid-secondary, .grid-tertiary, .grid-quaternary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .panels-row { grid-template-columns: 1fr; }
     }
     @media (max-width: 860px) {
@@ -267,7 +271,7 @@ HTML_TEMPLATE = """
       table { display: block; overflow-x: auto; }
     }
     @media (max-width: 560px) {
-      .grid-primary, .grid-secondary { grid-template-columns: 1fr; }
+      .grid-primary, .grid-secondary, .grid-tertiary, .grid-quaternary { grid-template-columns: 1fr; }
       .title { font-size: 24px; }
       .bar-row { grid-template-columns: 72px 1fr 78px; }
     }
@@ -309,19 +313,57 @@ HTML_TEMPLATE = """
     <div class="grid-secondary">
       <div class="card">
         <div class="label">Closed Trades 24h</div>
-        <div class="value mono neutral">{{ closed_trades }}</div>
+        <div class="value mono neutral">{{ closed_trades_24h }}</div>
       </div>
       <div class="card">
         <div class="label">Win Rate 24h</div>
-        <div class="value mono magenta">{{ win_rate }}</div>
+        <div class="value mono magenta">{{ win_rate_24h }}</div>
       </div>
       <div class="card">
         <div class="label">Profit Factor 24h</div>
-        <div class="value mono magenta">{{ profit_factor }}</div>
+        <div class="value mono magenta">{{ profit_factor_24h }}</div>
       </div>
       <div class="card">
         <div class="label">Fees 24h</div>
         <div class="value mono magenta">{{ fees_24h }}</div>
+      </div>
+    </div>
+
+    <div class="grid-tertiary">
+      <div class="card">
+        <div class="label">Closed Trades 7d</div>
+        <div class="value mono neutral">{{ closed_trades_7d }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Win Rate 7d</div>
+        <div class="value mono magenta">{{ win_rate_7d }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Profit Factor 7d</div>
+        <div class="value mono magenta">{{ profit_factor_7d }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Fees 7d</div>
+        <div class="value mono magenta">{{ fees_7d }}</div>
+      </div>
+    </div>
+
+    <div class="grid-quaternary">
+      <div class="card">
+        <div class="label">Closed Trades 30d</div>
+        <div class="value mono neutral">{{ closed_trades_30d }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Win Rate 30d</div>
+        <div class="value mono magenta">{{ win_rate_30d }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Profit Factor 30d</div>
+        <div class="value mono magenta">{{ profit_factor_30d }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Fees 30d</div>
+        <div class="value mono magenta">{{ fees_30d }}</div>
       </div>
     </div>
 
@@ -634,13 +676,18 @@ def dashboard():
         pnl7_class=css_class(summary.get("pnl_7d", 0)),
         pnl30=fmt_signed_num(summary.get("pnl_30d", 0), f" {quote}"),
         pnl30_class=css_class(summary.get("pnl_30d", 0)),
-        closed_trades=summary.get("closed_trades_24h", 0),
-        win_rate=fmt_pct(summary.get("win_rate_24h", 0)),
-        win_rate_class='magenta',
-        profit_factor=fmt_num(summary.get("profit_factor_24h", 0)),
-        profit_factor_class='magenta',
+        closed_trades_24h=summary.get("closed_trades_24h", 0),
+        win_rate_24h=fmt_pct(summary.get("win_rate_24h", 0)),
+        profit_factor_24h=fmt_num(summary.get("profit_factor_24h", 0)),
         fees_24h=fmt_signed_num(-(float(summary.get("fees_24h", 0) or 0)), f" {quote}"),
-        fees_class='magenta',
+        closed_trades_7d=summary.get("closed_trades_7d", "-"),
+        win_rate_7d=fmt_pct(summary.get("win_rate_7d")) if summary.get("win_rate_7d") is not None else "-",
+        profit_factor_7d=fmt_num(summary.get("profit_factor_7d")) if summary.get("profit_factor_7d") is not None else "-",
+        fees_7d=fmt_signed_num(-(float(summary.get("fees_7d", 0) or 0)), f" {quote}") if summary.get("fees_7d") is not None else "-",
+        closed_trades_30d=summary.get("closed_trades_30d", "-"),
+        win_rate_30d=fmt_pct(summary.get("win_rate_30d")) if summary.get("win_rate_30d") is not None else "-",
+        profit_factor_30d=fmt_num(summary.get("profit_factor_30d")) if summary.get("profit_factor_30d") is not None else "-",
+        fees_30d=fmt_signed_num(-(float(summary.get("fees_30d", 0) or 0)), f" {quote}") if summary.get("fees_30d") is not None else "-",
         bots=safe_bots,
         pnl_bars=pnl_bars,
         wins_pct=wins_pct,
@@ -655,3 +702,7 @@ def dashboard():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
+
+
+
