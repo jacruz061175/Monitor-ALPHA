@@ -49,7 +49,7 @@ HTML_TEMPLATE = """
       --text: #1f2937;
       --muted: #6b7280;
       --good: #f59e0b;
-      --bad: #d946ef;
+      --bad: #ff00ff;
       --warn: #d946ef;
       --line: #e5e7eb;
       --head: #f3f4f6;
