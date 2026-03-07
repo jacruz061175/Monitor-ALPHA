@@ -37,6 +37,9 @@ HTML_TEMPLATE = """
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ALPHA MONITOR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0b0f14;
@@ -54,7 +57,7 @@ HTML_TEMPLATE = """
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
       padding: 24px;
     }
     .wrap {
@@ -64,31 +67,46 @@ HTML_TEMPLATE = """
     h1 {
       margin: 0 0 8px;
       font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
     .sub {
       color: var(--muted);
       margin-bottom: 20px;
+      font-size: 14px;
     }
-    .grid {
+    .grid-primary,
+    .grid-secondary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
       margin-bottom: 18px;
+      align-items: stretch;
+    }
+    .grid-primary {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .grid-secondary {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     .card {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 14px;
+      min-width: 0;
     }
     .label {
       color: var(--muted);
       font-size: 13px;
       margin-bottom: 8px;
+      font-weight: 500;
     }
     .value {
       font-size: 24px;
       font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      word-break: break-word;
     }
     .good { color: var(--good); }
     .bad { color: var(--bad); }
@@ -132,19 +150,31 @@ HTML_TEMPLATE = """
       color: var(--muted);
       font-size: 12px;
     }
+    @media (max-width: 1000px) {
+      .grid-primary,
+      .grid-secondary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
     @media (max-width: 800px) {
       body { padding: 14px; }
       th, td { font-size: 12px; padding: 10px 8px; }
       .value { font-size: 20px; }
     }
+    @media (max-width: 560px) {
+      .grid-primary,
+      .grid-secondary {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Monitor de Bots</h1>
+    <h1>ALPHA MONITOR</h1>
     <div class="sub">Última actualización: {{ updated_at or 'Sin datos' }}</div>
 
-    <div class="grid">
+    <div class="grid-primary">
       <div class="card">
         <div class="label">Balance estimado</div>
         <div class="value">{{ balance }}</div>
@@ -160,10 +190,10 @@ HTML_TEMPLATE = """
       <div class="card">
         <div class="label">PnL 30d</div>
         <div class="value {{ pnl30_class }}">{{ pnl30 }}</div>
-
       </div>
+    </div>
 
-      <div class="stats-grid secondary">
+    <div class="grid-secondary">
       <div class="card">
         <div class="label">Closed trades 24h</div>
         <div class="value">{{ closed_trades }}</div>
