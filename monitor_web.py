@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template_string
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -44,16 +44,18 @@ HTML_TEMPLATE = """
     :root {
       --bg: #ffffff;
       --panel: #ffffff;
-      --panel-soft: #f8fafc;
-      --panel-2: #f1f5f9;
-      --text: #111827;
-      --muted: #64748b;
-      --good: #16a34a;
-      --bad: #d946ef;
-      --warn: #d97706;
-      --line: #dbe3ee;
-      --head: #eef3f8;
-      --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --panel-soft: #fafafa;
+      --panel-2: #f6f7f9;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --good: #f59e0b;
+      --bad: #f59e0b;
+      --warn: #f59e0b;
+      --line: #e5e7eb;
+      --head: #f3f4f6;
+      --shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+      --orange: #f59e0b;
+      --orange-soft: rgba(245, 158, 11, 0.18);
     }
     * { box-sizing: border-box; }
     body {
@@ -83,13 +85,13 @@ HTML_TEMPLATE = """
       gap: 10px;
     }
     .binance-mark {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
-      background: #fff8db;
+      border-radius: 9px;
+      background: #fff7e6;
       border: 1px solid #fde68a;
       color: #f0b90b;
       flex: 0 0 auto;
@@ -127,74 +129,13 @@ HTML_TEMPLATE = """
       font-weight: 800;
       line-height: 1.2;
       letter-spacing: -0.03em;
-      word-break: break-word;
     }
-    .value.mono, .money, .metric-sign {
+    .mono {
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
-    .good { color: var(--good); }
-    .bad { color: var(--bad); }
+    .good, .bad, .warn { color: var(--orange); }
     .neutral { color: var(--text); }
-    .panels-row {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
-      margin-top: 14px;
-      margin-bottom: 14px;
-      align-items: start;
-    }
-    .mini-panel {
-      background: var(--panel-soft);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 16px 18px;
-      box-shadow: var(--shadow);
-    }
-    .mini-title {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 14px;
-      color: var(--text);
-    }
-    .bar-row {
-      display: grid;
-      grid-template-columns: 84px 1fr 72px;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-    .bar-track {
-      width: 100%;
-      height: 12px;
-      border-radius: 999px;
-      background: #edf2f7;
-      overflow: hidden;
-      border: 1px solid #e5e7eb;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 999px;
-    }
-    .bar-good { background: linear-gradient(90deg, #22c55e, #16a34a); }
-    .bar-bad { background: linear-gradient(90deg, #f59e0b, #d946ef); }
-    .chart-panel {
-      background: var(--panel-soft);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-      margin-top: 8px;
-    }
-    .chart-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-    .chart-wrap {
-      height: 220px;
-      position: relative;
-    }
     table {
       width: 100%;
       border-collapse: separate;
@@ -204,10 +145,11 @@ HTML_TEMPLATE = """
       border-radius: 16px;
       overflow: hidden;
       box-shadow: var(--shadow);
+      table-layout: fixed;
     }
     thead th {
       background: var(--head);
-      color: #334155;
+      color: #374151;
       font-weight: 700;
       font-size: 14px;
       letter-spacing: 0.01em;
@@ -221,27 +163,23 @@ HTML_TEMPLATE = """
       border-bottom: 1px solid #edf2f7;
     }
     tbody tr:last-child td { border-bottom: 0; }
-    tbody tr:hover td { background: #fafcff; }
+    tbody tr:hover td { background: #fffaf0; }
     .coin-cell {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       min-width: 0;
-      font-weight: 700;
-    }
-    .coin-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 999px;
-      background: #fff8db;
-      border: 1px solid #fde68a;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
       font-weight: 800;
-      color: #a16207;
+      letter-spacing: -0.02em;
+    }
+    .coin-logo {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      object-fit: cover;
       flex: 0 0 auto;
+      background: #fff7e6;
+      border: 1px solid #fde68a;
     }
     .pill {
       display: inline-block;
@@ -249,11 +187,67 @@ HTML_TEMPLATE = """
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
-      border: 1px solid transparent;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      background: #fff7ed;
     }
-    .pill-buy { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
-    .pill-sell { color: #a21caf; background: #fae8ff; border-color: #f5d0fe; }
     .muted { color: var(--muted); }
+    .panels-row {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+      margin-top: 14px;
+      margin-bottom: 14px;
+      align-items: start;
+    }
+    .mini-panel, .chart-panel {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .mini-title, .chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 84px 1fr 92px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .bar-track {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    }
+    .chart-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .chart-year {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .chart-wrap {
+      height: 220px;
+      position: relative;
+    }
     .footer {
       margin-top: 12px;
       color: var(--muted);
@@ -263,7 +257,7 @@ HTML_TEMPLATE = """
       .grid-primary, .grid-secondary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .panels-row { grid-template-columns: 1fr; }
     }
-    @media (max-width: 800px) {
+    @media (max-width: 860px) {
       body { padding: 14px; }
       .value { font-size: 20px; }
       table { display: block; overflow-x: auto; }
@@ -271,7 +265,7 @@ HTML_TEMPLATE = """
     @media (max-width: 560px) {
       .grid-primary, .grid-secondary { grid-template-columns: 1fr; }
       .title { font-size: 24px; }
-      .bar-row { grid-template-columns: 72px 1fr 56px; }
+      .bar-row { grid-template-columns: 72px 1fr 78px; }
     }
   </style>
 </head>
@@ -310,15 +304,15 @@ HTML_TEMPLATE = """
 
     <div class="grid-secondary">
       <div class="card">
-        <div class="label">Cerrado 24h</div>
+        <div class="label">Closed Trades 24h</div>
         <div class="value mono neutral">{{ closed_trades }}</div>
       </div>
       <div class="card">
-        <div class="label">Efectividad 24h</div>
+        <div class="label">Win Rate 24h</div>
         <div class="value mono {{ win_rate_class }}">{{ win_rate }}</div>
       </div>
       <div class="card">
-        <div class="label">Profit factor 24h</div>
+        <div class="label">Profit Factor 24h</div>
         <div class="value mono {{ profit_factor_class }}">{{ profit_factor }}</div>
       </div>
       <div class="card">
@@ -330,14 +324,14 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th>Moneda</th>
-          <th>Precio</th>
-          <th>Mercado</th>
-          <th>Posición</th>
-          <th>PnL 24h</th>
-          <th>Cerrado</th>
-          <th>Efectividad</th>
-          <th>Última operación</th>
+          <th style="width:16%;">Moneda</th>
+          <th style="width:12%;">Precio</th>
+          <th style="width:10%;">Mercado</th>
+          <th style="width:12%;">Posición</th>
+          <th style="width:14%;">PnL 24h</th>
+          <th style="width:9%;">Cerrado</th>
+          <th style="width:10%;">Efectividad</th>
+          <th style="width:17%;">Última operación</th>
         </tr>
       </thead>
       <tbody>
@@ -345,19 +339,19 @@ HTML_TEMPLATE = """
         <tr>
           <td>
             <div class="coin-cell">
-              <span class="coin-icon">{{ bot.coin_short }}</span>
+              <img class="coin-logo" src="{{ bot.logo_url }}" alt="{{ bot.symbol }}">
               <strong>{{ bot.symbol }}</strong>
             </div>
           </td>
-          <td>{{ bot.price_text }}</td>
+          <td class="mono">{{ bot.price_text }}</td>
           <td>{{ bot.market_text }}</td>
           <td>{{ bot.position_text }}</td>
-          <td class="{{ bot.pnl_class }}">{{ bot.pnl_24h_text }}</td>
-          <td>{{ bot.closed_trades_24h }}</td>
-          <td class="{{ bot.win_rate_class }}">{{ bot.win_rate_text }}</td>
+          <td class="mono {{ bot.pnl_class }}">{{ bot.pnl_24h_text }}</td>
+          <td class="mono">{{ bot.closed_trades_24h }}</td>
+          <td class="mono {{ bot.win_rate_class }}">{{ bot.win_rate_text }}</td>
           <td>
             {% if bot.last_trade and bot.last_trade.side %}
-              <span class="pill {{ 'pill-buy' if bot.last_trade.side == 'COMPRA' else 'pill-sell' }}">{{ bot.last_trade.side }}</span><br>
+              <span class="pill">{{ bot.last_trade.side }}</span><br>
               <span class="muted">{{ bot.last_trade.time }}</span><br>
               <span>Precio: {{ bot.last_trade.price }}</span><br>
               <span>Cant.: {{ bot.last_trade.qty }}</span>
@@ -376,8 +370,8 @@ HTML_TEMPLATE = """
         {% for row in pnl_bars %}
         <div class="bar-row">
           <div>{{ row.symbol }}</div>
-          <div class="bar-track"><div class="bar-fill {{ row.css }}" style="width: {{ row.width }}%;"></div></div>
-          <div class="{{ row.css }}">{{ row.text }}</div>
+          <div class="bar-track"><div class="bar-fill" style="width: {{ row.width }}%;"></div></div>
+          <div class="mono" style="color:#9a3412;">{{ row.text }}</div>
         </div>
         {% endfor %}
       </div>
@@ -385,19 +379,22 @@ HTML_TEMPLATE = """
         <div class="mini-title">Efectividad</div>
         <div class="bar-row">
           <div>Ganadas</div>
-          <div class="bar-track"><div class="bar-fill bar-good" style="width: {{ wins_pct }}%;"></div></div>
-          <div>{{ wins_pct_text }}</div>
+          <div class="bar-track"><div class="bar-fill" style="width: {{ wins_pct }}%;"></div></div>
+          <div class="mono" style="color:#9a3412;">{{ wins_pct_text }}</div>
         </div>
         <div class="bar-row">
           <div>Perdidas</div>
-          <div class="bar-track"><div class="bar-fill bar-bad" style="width: {{ losses_pct }}%;"></div></div>
-          <div>{{ losses_pct_text }}</div>
+          <div class="bar-track"><div class="bar-fill" style="width: {{ losses_pct }}%;"></div></div>
+          <div class="mono" style="color:#9a3412;">{{ losses_pct_text }}</div>
         </div>
       </div>
     </div>
 
     <div class="chart-panel">
-      <div class="chart-title">Evolución estimada (USDT)</div>
+      <div class="chart-head">
+        <div class="chart-title">Evolución estimada (USDT)</div>
+        <div class="chart-year">{{ chart_year }}</div>
+      </div>
       <div class="chart-wrap">
         <canvas id="equityChart"></canvas>
       </div>
@@ -418,12 +415,14 @@ HTML_TEMPLATE = """
         datasets: [{
           label: 'USDT',
           data: values,
-          borderColor: '#f0b90b',
-          backgroundColor: 'rgba(240, 185, 11, 0.15)',
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.15)',
           fill: true,
           tension: 0.25,
           pointRadius: 3,
-          pointHoverRadius: 4
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#f59e0b',
+          pointBorderColor: '#f59e0b'
         }]
       },
       options: {
@@ -435,11 +434,11 @@ HTML_TEMPLATE = """
         scales: {
           x: {
             grid: { color: '#eef2f7' },
-            ticks: { color: '#64748b' }
+            ticks: { color: '#6b7280' }
           },
           y: {
             grid: { color: '#eef2f7' },
-            ticks: { color: '#64748b' }
+            ticks: { color: '#6b7280' }
           }
         }
       }
@@ -489,13 +488,6 @@ def css_class(v):
     return "neutral"
 
 
-def coin_short(symbol: str) -> str:
-    if not symbol:
-        return "?"
-    base = symbol.replace("USDT", "").replace("BUSD", "").replace("USDC", "")
-    return base[:3].upper()
-
-
 def position_text(position):
     if position == "LONG":
         return "Compró"
@@ -506,6 +498,20 @@ def position_text(position):
 
 def market_text(regime):
     return regime if regime else "RANGE"
+
+
+def coin_logo_url(symbol: str) -> str:
+    base = (symbol or "").replace("USDT", "").replace("BUSD", "").replace("USDC", "").lower()
+    mapping = {
+        "btc": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/btc.png",
+        "eth": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/eth.png",
+        "bnb": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/bnb.png",
+        "ada": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/ada.png",
+        "xrp": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/xrp.png",
+        "sol": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/sol.png",
+        "dot": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/dot.png",
+    }
+    return mapping.get(base, f"https://cryptoicons.org/api/icon/{base}/32")
 
 
 @app.route("/health")
@@ -547,28 +553,28 @@ def dashboard():
     for bot in bots_sorted:
         bot = bot or {}
         last_trade = bot.get("last_trade") or {}
-        pnl_24h = bot.get("pnl_24h", 0) or 0
-        win_rate_24h = bot.get("win_rate_24h", 0) or 0
+        pnl_24h = float(bot.get("pnl_24h", 0) or 0)
+        win_rate_24h = float(bot.get("win_rate_24h", 0) or 0)
         closed_24h = bot.get("closed_trades_24h", 0) or 0
         last_price = last_trade.get("price")
+
         if pnl_24h > 0:
             wins_positive += 1
         elif pnl_24h < 0:
             losses_positive += 1
-        pnl_values.append((bot.get("symbol", "-"), float(pnl_24h)))
+        pnl_values.append((bot.get("symbol", "-"), pnl_24h))
 
         safe_bots.append({
             "symbol": bot.get("symbol", "-"),
-            "coin_short": coin_short(bot.get("symbol", "-")),
+            "logo_url": coin_logo_url(bot.get("symbol", "-")),
             "price_text": fmt_num(last_price) if last_price not in (None, "") else "-",
             "market_text": market_text(bot.get("regime")),
             "position_text": position_text(bot.get("position")),
-            "pnl_24h": pnl_24h,
-            "pnl_class": css_class(pnl_24h),
             "pnl_24h_text": fmt_signed_num(pnl_24h, f" {quote}"),
+            "pnl_class": css_class(pnl_24h),
             "closed_trades_24h": closed_24h,
             "win_rate_text": fmt_pct(win_rate_24h),
-            "win_rate_class": css_class((float(win_rate_24h) if win_rate_24h is not None else 0) - 0.5),
+            "win_rate_class": css_class(win_rate_24h - 0.5),
             "last_trade": {
                 "side": last_trade.get("side"),
                 "time": last_trade.get("time", "-"),
@@ -584,23 +590,35 @@ def dashboard():
         pnl_bars.append({
             "symbol": symbol,
             "width": width,
-            "css": "bar-good" if value > 0 else "bar-bad",
             "text": fmt_signed_num(value, f" {quote}"),
         })
 
     total_scored = wins_positive + losses_positive
-    if total_scored > 0:
-        wins_pct = round((wins_positive / total_scored) * 100, 1)
-    else:
-        wins_pct = 0.0
-    losses_pct = round(100 - wins_pct, 1) if total_scored > 0 else 0.0
+    wins_pct = round((wins_positive / total_scored) * 100, 1) if total_scored else 0.0
+    losses_pct = round(100 - wins_pct, 1) if total_scored else 0.0
 
     bal = float(state.get("balance_estimated", 0) or 0) if isinstance(state, dict) else 0.0
     p24 = float(summary.get("pnl_24h", 0) or 0)
     p7 = float(summary.get("pnl_7d", 0) or 0)
     p30 = float(summary.get("pnl_30d", 0) or 0)
+
+    now_dt = None
+    ts = state.get("timestamp") if isinstance(state, dict) else None
+    if ts:
+        try:
+            now_dt = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+        except Exception:
+            now_dt = datetime.now()
+    else:
+        now_dt = datetime.now()
+
     chart_values = [round(bal - p30, 6), round(bal - p7, 6), round(bal - p24, 6), round(bal, 6)]
-    chart_labels = ["30d", "7d", "24h", "Ahora"]
+    chart_dates = [
+        (now_dt - timedelta(days=3)).strftime("%d/%m"),
+        (now_dt - timedelta(days=2)).strftime("%d/%m"),
+        (now_dt - timedelta(days=1)).strftime("%d/%m"),
+        now_dt.strftime("%d/%m"),
+    ]
 
     return render_template_string(
         HTML_TEMPLATE,
@@ -614,19 +632,20 @@ def dashboard():
         pnl30_class=css_class(summary.get("pnl_30d", 0)),
         closed_trades=summary.get("closed_trades_24h", 0),
         win_rate=fmt_pct(summary.get("win_rate_24h", 0)),
-        win_rate_class=css_class((float(summary.get("win_rate_24h", 0) or 0) - 0.5)),
+        win_rate_class=css_class(float(summary.get("win_rate_24h", 0) or 0) - 0.5),
         profit_factor=fmt_num(summary.get("profit_factor_24h", 0)),
-        profit_factor_class=css_class((float(summary.get("profit_factor_24h", 0) or 0) - 1.0)),
+        profit_factor_class="warn" if float(summary.get("profit_factor_24h", 0) or 0) >= 0 else "neutral",
         fees_24h=fmt_signed_num(-(float(summary.get("fees_24h", 0) or 0)), f" {quote}"),
-        fees_class="warn" if float(summary.get("fees_24h", 0) or 0) > 0 else "neutral",
+        fees_class="warn" if float(summary.get("fees_24h", 0) or 0) >= 0 else "neutral",
         bots=safe_bots,
         pnl_bars=pnl_bars,
         wins_pct=wins_pct,
         wins_pct_text=f"{wins_pct:.1f}%",
         losses_pct=losses_pct,
         losses_pct_text=f"{losses_pct:.1f}%",
-        chart_labels=json.dumps(chart_labels),
+        chart_labels=json.dumps(chart_dates),
         chart_values=json.dumps(chart_values),
+        chart_year=now_dt.strftime("%Y"),
     )
 
 
