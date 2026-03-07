@@ -263,7 +263,7 @@ def api_monitor_state():
     return jsonify(load_state())
 
 
-@app.route("/update-monitor", methods=["POST"])
+@app.route("/update", methods=["POST"])
 def update_monitor():
     if not token_ok(request):
         return jsonify({"ok": False, "error": "unauthorized"}), 401
