@@ -139,7 +139,6 @@ HTML_TEMPLATE = """
     .mono {
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
-      text-align: right;
     }
     .good { color: var(--orange); }
     .bad, .warn { color: var(--bad); }
@@ -223,10 +222,10 @@ HTML_TEMPLATE = """
     }
     .bar-row {
       display: grid;
-      grid-template-columns: 84px 1fr 95px;
+      grid-template-columns: 84px minmax(0, 560px) 110px;
       gap: 8px;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       font-size: 14px;
     }
     .bar-row > div:last-child {
@@ -298,7 +297,7 @@ HTML_TEMPLATE = """
 
     <div class="grid-primary">
       <div class="card">
-        <div class="label">Balance estimado</div>
+        <div class="label">Balance Estimado</div>
         <div class="value mono neutral">{{ balance }}</div>
       </div>
       <div class="card">
@@ -382,7 +381,7 @@ HTML_TEMPLATE = """
           <th style="width:14%;">PnL 24h</th>
           <th style="width:9%;">Cerrado</th>
           <th style="width:10%;">Efectividad</th>
-          <th style="width:17%;">Última operación</th>
+          <th style="width:17%;">Última Operación</th>
         </tr>
       </thead>
       <tbody>
