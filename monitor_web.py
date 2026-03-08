@@ -140,7 +140,6 @@ HTML_TEMPLATE = """
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
       text-align: right;
-      max-width: 60px;
     }
     .good { color: var(--orange); }
     .bad, .warn { color: var(--bad); }
@@ -224,11 +223,15 @@ HTML_TEMPLATE = """
     }
     .bar-row {
       display: grid;
-      grid-template-columns: 84px 1fr 60px;
-      gap: 10px;
+      grid-template-columns: 84px 1fr 95px;
+      gap: 8px;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       font-size: 14px;
+    }
+    .bar-row > div:last-child {
+      justify-self: end;
+      min-width: 0;
     }
     .bar-track {
       width: 100%;
