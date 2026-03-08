@@ -223,8 +223,9 @@ HTML_TEMPLATE = """
     }
     .bar-row {
       display: grid;
-      grid-template-columns: 84px 1fr 120px;
+      grid-template-columns: 84px 1fr 70px;
       gap: 10px;
+    }
       align-items: center;
       margin-bottom: 10px;
       font-size: 14px;
