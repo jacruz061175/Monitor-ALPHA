@@ -139,6 +139,7 @@ HTML_TEMPLATE = """
     .mono {
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+      text-align: right;
     }
     .good { color: var(--orange); }
     .bad, .warn { color: var(--bad); }
