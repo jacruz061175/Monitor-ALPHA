@@ -222,10 +222,10 @@ HTML_TEMPLATE = """
     }
     .bar-row {
       display: grid;
-      grid-template-columns: 84px minmax(0, 560px) 110px;
-      gap: 8px;
+      grid-template-columns: 90px 1fr 140px;
+      gap: 12px;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       font-size: 14px;
     }
     .bar-row > div:last-child {
@@ -428,12 +428,12 @@ HTML_TEMPLATE = """
       <div class="mini-panel">
         <div class="mini-title">Efectividad</div>
         <div class="bar-row">
-          <div>Ganadas</div>
+          <div>Ganadas ({{ wins_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ wins_pct }}%;"></div></div>
           <div class="mono magenta">{{ wins_pct_text }}</div>
         </div>
         <div class="bar-row">
-          <div>Perdidas</div>
+          <div>Perdidas ({{ losses_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ losses_pct }}%;"></div></div>
           <div class="mono magenta">{{ losses_pct_text }}</div>
         </div>
@@ -597,8 +597,6 @@ def dashboard():
     bots_sorted = sorted(bots, key=lambda x: (x or {}).get("symbol", ""))
     safe_bots = []
     pnl_values = []
-    wins_positive = 0
-    losses_positive = 0
 
     for bot in bots_sorted:
         bot = bot or {}
@@ -608,10 +606,6 @@ def dashboard():
         closed_24h = bot.get("closed_trades_24h", 0) or 0
         last_price = last_trade.get("price")
 
-        if pnl_24h > 0:
-            wins_positive += 1
-        elif pnl_24h < 0:
-            losses_positive += 1
         pnl_values.append((bot.get("symbol", "-"), pnl_24h))
 
         safe_bots.append({
@@ -643,9 +637,14 @@ def dashboard():
             "text": fmt_signed_num(value, f" {quote}"),
         })
 
-    total_scored = wins_positive + losses_positive
-    wins_pct = round((wins_positive / total_scored) * 100, 1) if total_scored else 0.0
-    losses_pct = round(100 - wins_pct, 1) if total_scored else 0.0
+    closed_total = int(summary.get("closed_trades_24h", 0) or 0)
+    win_rate = float(summary.get("win_rate_24h", 0) or 0)
+
+    wins_count = round(closed_total * win_rate)
+    losses_count = max(0, closed_total - wins_count)
+
+    wins_pct = round((wins_count / closed_total) * 100, 1) if closed_total else 0.0
+    losses_pct = round((losses_count / closed_total) * 100, 1) if closed_total else 0.0
 
     bal = float(state.get("balance_estimated", 0) or 0) if isinstance(state, dict) else 0.0
     p24 = float(summary.get("pnl_24h", 0) or 0)
@@ -681,6 +680,8 @@ def dashboard():
         pnl30=fmt_signed_num(summary.get("pnl_30d", 0), f" {quote}"),
         pnl30_class=css_class(summary.get("pnl_30d", 0)),
         closed_trades_24h=summary.get("closed_trades_24h", 0),
+        wins_count=wins_count,
+        losses_count=losses_count,
         win_rate_24h=fmt_pct(summary.get("win_rate_24h", 0)),
         profit_factor_24h=fmt_num(summary.get("profit_factor_24h", 0)),
         fees_24h=fmt_signed_num(-(float(summary.get("fees_24h", 0) or 0)), f" {quote}"),
