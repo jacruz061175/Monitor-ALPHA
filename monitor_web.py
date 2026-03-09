@@ -211,6 +211,12 @@ HTML_TEMPLATE = """
       min-width: 0;
       font-weight: 800;
       letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .coin-meta {
+      display: grid;
+      gap: 4px;
+      line-height: 1.25;
     }
     .coin-logo {
       width: 22px;
@@ -416,7 +422,7 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:14%;">Moneda</th>
+          <th style="width:17%;">Moneda</th>
           <th style="width:10%;">PnL 24h</th>
           <th style="width:10%;">PnL 7d</th>
           <th style="width:10%;">PnL 30d</th>
@@ -426,7 +432,7 @@ HTML_TEMPLATE = """
           <th style="width:5%;">PF</th>
           <th style="width:6%;">AVG</th>
           <th style="width:8%;">Expectancy</th>
-          <th style="width:18%;">Última Operación</th>
+          <th style="width:15%;">Última Operación</th>
         </tr>
       </thead>
       <tbody>
@@ -437,11 +443,11 @@ HTML_TEMPLATE = """
               <img class="coin-logo" src="{{ bot.logo_url }}" alt="{{ bot.symbol }}">
               <strong>{{ bot.symbol }}</strong>
             </div>
-          </td>
-          <td>
-            <div class="mono muted">{{ bot.price_text }}</div>
-            <div class="muted" style="margin-top:8px;">{{ bot.market_text }}</div>
-            <div style="margin-top:4px;">{{ bot.position_text }}</div>
+            <div class="coin-meta">
+              <div class="mono muted">{{ bot.price_text }}</div>
+              <div class="muted">{{ bot.market_text }}</div>
+              <div>{{ bot.position_text }}</div>
+            </div>
           </td>
           <td class="mono {{ bot.pnl_class }}">{{ bot.pnl_24h_text }}</td>
           <td class="mono {{ bot.pnl_7d_class }}">{{ bot.pnl_7d_text }}</td>
