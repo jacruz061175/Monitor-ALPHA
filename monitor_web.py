@@ -31,19 +31,18 @@ def save_balance_history(balance, timestamp):
         return
 
     today = timestamp[:10]  # YYYY-MM-DD
-
     history = []
 
     if os.path.exists(HISTORY_FILE):
         try:
-            with open(HISTORY_FILE) as f:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
                 history = json.load(f)
         except:
             history = []
 
-    # si ya existe registro para hoy no guardar otro
+    # solo guardar un punto por día
     for h in history:
-        if h["time"][:10] == today:
+        if h.get("time", "")[:10] == today:
             return
 
     history.append({
@@ -51,31 +50,11 @@ def save_balance_history(balance, timestamp):
         "balance": balance
     })
 
-    # limitar histórico
+    # máximo 365 días de histórico
     history = history[-365:]
 
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f)
-        
-    history = []
-
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, "r") as f:
-                history = json.load(f)
-        except:
-            history = []
-
-    history.append({
-        "time": timestamp,
-        "balance": balance
-    })
-
-    # limitar a 500 puntos para que no crezca infinito
-    history = history[-500:]
-
-    with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f)
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
         
 def token_ok(req) -> bool:
     if not MONITOR_TOKEN:
