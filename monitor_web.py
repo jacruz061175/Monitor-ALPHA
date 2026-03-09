@@ -416,14 +416,17 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:16%;">Moneda</th>
-          <th style="width:12%;">Precio</th>
-          <th style="width:10%;">Mercado</th>
-          <th style="width:12%;">Posición</th>
-          <th style="width:14%;">PnL 24h</th>
-          <th style="width:9%;">Cerrado</th>
-          <th style="width:10%;">Efectividad</th>
-          <th style="width:17%;">Última Operación</th>
+          <th style="width:14%;">Moneda</th>
+          <th style="width:10%;">PnL 24h</th>
+          <th style="width:10%;">PnL 7d</th>
+          <th style="width:10%;">PnL 30d</th>
+          <th style="width:9%;">FEE24h</th>
+          <th style="width:5%;">CT</th>
+          <th style="width:5%;">WR</th>
+          <th style="width:5%;">PF</th>
+          <th style="width:6%;">AVG</th>
+          <th style="width:8%;">Expectancy</th>
+          <th style="width:18%;">Última Operación</th>
         </tr>
       </thead>
       <tbody>
@@ -435,12 +438,20 @@ HTML_TEMPLATE = """
               <strong>{{ bot.symbol }}</strong>
             </div>
           </td>
-          <td class="mono">{{ bot.price_text }}</td>
-          <td>{{ bot.market_text }}</td>
-          <td>{{ bot.position_text }}</td>
+          <td>
+            <div class="mono muted">{{ bot.price_text }}</div>
+            <div class="muted" style="margin-top:8px;">{{ bot.market_text }}</div>
+            <div style="margin-top:4px;">{{ bot.position_text }}</div>
+          </td>
           <td class="mono {{ bot.pnl_class }}">{{ bot.pnl_24h_text }}</td>
+          <td class="mono {{ bot.pnl_7d_class }}">{{ bot.pnl_7d_text }}</td>
+          <td class="mono {{ bot.pnl_30d_class }}">{{ bot.pnl_30d_text }}</td>
+          <td class="mono magenta">{{ bot.fees_24h_text }}</td>
           <td class="mono">{{ bot.closed_trades_24h }}</td>
           <td class="mono {{ bot.win_rate_class }}">{{ bot.win_rate_text }}</td>
+          <td class="mono {{ bot.profit_factor_class }}">{{ bot.profit_factor_text }}</td>
+          <td class="mono {{ bot.avg_trade_class }}">{{ bot.avg_trade_text }}</td>
+          <td class="mono {{ bot.expectancy_class }}">{{ bot.expectancy_text }}</td>
           <td>
             {% if bot.last_trade and bot.last_trade.side %}
               <span class="pill">{{ bot.last_trade.side }}</span><br>
@@ -676,6 +687,13 @@ def dashboard():
 
         pnl_values.append((bot.get("symbol", "-"), pnl_24h))
 
+        pnl_7d = float(bot.get("pnl_7d", 0) or 0)
+        pnl_30d = float(bot.get("pnl_30d", 0) or 0)
+        fees_24h = float(bot.get("fees_24h", 0) or 0)
+        profit_factor_24h = float(bot.get("profit_factor_24h", 0) or 0)
+        avg_trade_24h = float(bot.get("avg_trade_24h", bot.get("avg_trade", 0)) or 0)
+        expectancy_24h = float(bot.get("expectancy_24h", bot.get("expectancy", 0)) or 0)
+
         safe_bots.append({
             "symbol": bot.get("symbol", "-"),
             "logo_url": coin_logo_url(bot.get("symbol", "-")),
@@ -684,9 +702,20 @@ def dashboard():
             "position_text": position_text(bot.get("position")),
             "pnl_24h_text": fmt_signed_num(pnl_24h, f" {quote}"),
             "pnl_class": css_class(pnl_24h),
+            "pnl_7d_text": fmt_signed_num(pnl_7d, f" {quote}"),
+            "pnl_7d_class": css_class(pnl_7d),
+            "pnl_30d_text": fmt_signed_num(pnl_30d, f" {quote}"),
+            "pnl_30d_class": css_class(pnl_30d),
+            "fees_24h_text": fmt_signed_num(-fees_24h, f" {quote}"),
             "closed_trades_24h": closed_24h,
             "win_rate_text": fmt_pct(win_rate_24h),
             "win_rate_class": metric_threshold_class(win_rate_24h * 100, 60),
+            "profit_factor_text": fmt_num(profit_factor_24h),
+            "profit_factor_class": metric_threshold_class(profit_factor_24h, 1.5),
+            "avg_trade_text": fmt_signed_num(avg_trade_24h, f" {quote}"),
+            "avg_trade_class": css_class(avg_trade_24h),
+            "expectancy_text": fmt_signed_num(expectancy_24h, f" {quote}"),
+            "expectancy_class": css_class(expectancy_24h),
             "last_trade": {
                 "side": last_trade.get("side"),
                 "time": last_trade.get("time", "-"),
