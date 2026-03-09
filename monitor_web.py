@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
+HISTORY_FILE = "balance_history.json"
 STATE_FILE = "render_monitor_state.json"
+HISTORY_FILE = "balance_history.json"
 MONITOR_TOKEN = os.getenv("MONITOR_TOKEN", "")
 
 
@@ -23,7 +25,27 @@ def save_state(payload: dict):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
+def save_balance_history(balance, timestamp):
+    history = []
 
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r") as f:
+                history = json.load(f)
+        except:
+            history = []
+
+    history.append({
+        "time": timestamp,
+        "balance": balance
+    })
+
+    # limitar a 500 puntos para que no crezca infinito
+    history = history[-500:]
+
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f)
+        
 def token_ok(req) -> bool:
     if not MONITOR_TOKEN:
         return True
@@ -594,9 +616,17 @@ def update_monitor():
         return jsonify({"ok": False, "error": "invalid json"}), 400
 
     save_state(payload)
-    return jsonify({"ok": True, "saved": True, "bots": len(payload.get("bots", []))})
 
+    save_balance_history(
+        payload.get("balance_estimated", 0),
+        payload.get("timestamp")
+    )
 
+    return jsonify({
+    "ok": True,
+    "saved": True,
+    "bots": len(payload.get("bots", []))
+    })
 @app.route("/")
 def dashboard():
     state = load_state()
@@ -672,7 +702,24 @@ def dashboard():
     else:
         now_dt = datetime.now()
 
-    chart_values = [round(bal - p30, 6), round(bal - p7, 6), round(bal - p24, 6), round(bal, 6)]
+    chart_values = []
+    chart_dates = []
+
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE) as f:
+                history = json.load(f)
+
+            for h in history[-120:]:  # últimos 120 puntos
+                chart_values.append(h["balance"])
+                chart_dates.append(h["time"][:10])
+
+        except:
+            chart_values = [bal]  
+            chart_dates = [now_dt.strftime("%d/%m")]
+    else:
+        chart_values = [bal]
+        chart_dates = [now_dt.strftime("%d/%m")]
     chart_dates = [
         (now_dt - timedelta(days=3)).strftime("%d/%m"),
         (now_dt - timedelta(days=2)).strftime("%d/%m"),
