@@ -245,6 +245,10 @@ HTML_TEMPLATE = """
       border-radius: 999px;
       background: linear-gradient(90deg, #fbbf24, #f59e0b);
     }
+
+    .bar-fill-positive {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+    }
     .chart-head {
       display: flex;
       align-items: baseline;
@@ -420,7 +424,7 @@ HTML_TEMPLATE = """
         {% for row in pnl_bars %}
         <div class="bar-row">
           <div>{{ row.symbol }}</div>
-          <div class="bar-track"><div class="bar-fill" style="width: {{ row.width }}%;"></div></div>
+          <div class="bar-track"><div class="bar-fill {{ row.bar_class }}" style="width: {{ row.width }}%;"></div></div>
           <div class="mono magenta">{{ row.text }}</div>
         </div>
         {% endfor %}
@@ -635,6 +639,7 @@ def dashboard():
             "symbol": symbol,
             "width": width,
             "text": fmt_signed_num(value, f" {quote}"),
+            "bar_class": "bar-fill-positive" if value > 0 else "",
         })
 
     closed_total = int(summary.get("closed_trades_24h", 0) or 0)
