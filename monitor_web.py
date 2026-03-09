@@ -472,12 +472,12 @@ HTML_TEMPLATE = """
         <div class="bar-row">
           <div>Ganadas ({{ wins_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ wins_pct }}%;"></div></div>
-          <div class="mono magenta">{{ wins_pct_text }}</div>
+          <div class="mono {{ wins_pct_class }}">{{ wins_pct_text }}</div>
         </div>
         <div class="bar-row">
           <div>Perdidas ({{ losses_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ losses_pct }}%;"></div></div>
-          <div class="mono magenta">{{ losses_pct_text }}</div>
+          <div class="mono {{ losses_pct_class }}">{{ losses_pct_text }}</div>
         </div>
       </div>
     </div>
@@ -533,14 +533,13 @@ HTML_TEMPLATE = """
               maxTicksLimit: 6,
               callback: function(value, index) {
                 const label = this.getLabelForValue(value);
-
                 if (index === 0) {
                   return "{{ chart_year }}   " + label;
                 }
-
                 return label;
               }
             }
+          },
           y: {
             grid: { color: '#eef2f7' },
             ticks: { color: '#6b7280' }
@@ -687,7 +686,7 @@ def dashboard():
             "pnl_class": css_class(pnl_24h),
             "closed_trades_24h": closed_24h,
             "win_rate_text": fmt_pct(win_rate_24h),
-            "win_rate_class": 'magenta',
+            "win_rate_class": metric_threshold_class(win_rate_24h * 100, 60),
             "last_trade": {
                 "side": last_trade.get("side"),
                 "time": last_trade.get("time", "-"),
@@ -789,8 +788,10 @@ def dashboard():
         pnl_bars=pnl_bars,
         wins_pct=wins_pct,
         wins_pct_text=f"{wins_pct:.1f}%",
+        wins_pct_class=metric_threshold_class(wins_pct, 60),
         losses_pct=losses_pct,
         losses_pct_text=f"{losses_pct:.1f}%",
+        losses_pct_class="good" if losses_pct < 40 else "magenta",
         chart_labels=json.dumps(chart_dates),
         chart_values=json.dumps(chart_values),
         chart_year=now_dt.strftime("%Y"),
