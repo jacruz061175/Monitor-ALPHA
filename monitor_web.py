@@ -582,10 +582,10 @@ def metric_threshold_class(v, threshold):
 
 def position_text(position):
     if position == "LONG":
-        return "Posición abierta"
+        return "Posición Abierta"
     if position == "SHORT":
-        return "Posición corta"
-    return "Sin posición"
+        return "Posición Corta"
+    return "Sin Posición"
 
 
 def market_text(regime):
