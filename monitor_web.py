@@ -582,9 +582,9 @@ def metric_threshold_class(v, threshold):
 
 def position_text(position):
     if position == "LONG":
-        return "Compró"
+        return "Posición abierta"
     if position == "SHORT":
-        return "Vendió"
+        return "Posición corta"
     return "Sin posición"
 
 
