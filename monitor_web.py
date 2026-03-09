@@ -140,7 +140,7 @@ HTML_TEMPLATE = """
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
-    .good { color: var(--orange); }
+    .good { color: #16a34a; }
     .bad, .warn { color: var(--bad); }
     .neutral { color: var(--text); }
     .magenta { color: var(--bad); }
@@ -723,4 +723,4 @@ def dashboard():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)    
+    app.run(host="0.0.0.0", port=10000)
