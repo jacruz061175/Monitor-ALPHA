@@ -430,7 +430,7 @@ HTML_TEMPLATE = """
         {% endfor %}
       </div>
       <div class="mini-panel">
-        <div class="mini-title">Efectividad</div>
+        <div class="mini-title">Efectividad 24h</div>
         <div class="bar-row">
           <div>Ganadas ({{ wins_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ wins_pct }}%;"></div></div>
