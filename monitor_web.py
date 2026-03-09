@@ -26,6 +26,37 @@ def save_state(payload: dict):
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
 def save_balance_history(balance, timestamp):
+
+    if not timestamp:
+        return
+
+    today = timestamp[:10]  # YYYY-MM-DD
+
+    history = []
+
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE) as f:
+                history = json.load(f)
+        except:
+            history = []
+
+    # si ya existe registro para hoy no guardar otro
+    for h in history:
+        if h["time"][:10] == today:
+            return
+
+    history.append({
+        "time": timestamp,
+        "balance": balance
+    })
+
+    # limitar histórico
+    history = history[-365:]
+
+    with open(HISTORY_FILE, "w") as f:
+        json.dump(history, f)
+        
     history = []
 
     if os.path.exists(HISTORY_FILE):
@@ -720,12 +751,6 @@ def dashboard():
     else:
         chart_values = [bal]
         chart_dates = [now_dt.strftime("%d/%m")]
-    chart_dates = [
-        (now_dt - timedelta(days=3)).strftime("%d/%m"),
-        (now_dt - timedelta(days=2)).strftime("%d/%m"),
-        (now_dt - timedelta(days=1)).strftime("%d/%m"),
-        now_dt.strftime("%d/%m"),
-    ]
 
     return render_template_string(
         HTML_TEMPLATE,
