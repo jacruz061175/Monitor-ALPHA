@@ -325,11 +325,11 @@ HTML_TEMPLATE = """
       </div>
       <div class="card">
         <div class="label">Win Rate 24h</div>
-        <div class="value mono magenta">{{ win_rate_24h }}</div>
+        <div class="value mono {{ win_rate_24h_class }}">{{ win_rate_24h }}</div>
       </div>
       <div class="card">
         <div class="label">Profit Factor 24h</div>
-        <div class="value mono magenta">{{ profit_factor_24h }}</div>
+        <div class="value mono {{ profit_factor_24h_class }}">{{ profit_factor_24h }}</div>
       </div>
       <div class="card">
         <div class="label">Fees 24h</div>
@@ -344,11 +344,11 @@ HTML_TEMPLATE = """
       </div>
       <div class="card">
         <div class="label">Win Rate 7d</div>
-        <div class="value mono magenta">{{ win_rate_7d }}</div>
+        <div class="value mono {{ win_rate_7d_class }}">{{ win_rate_7d }}</div>
       </div>
       <div class="card">
         <div class="label">Profit Factor 7d</div>
-        <div class="value mono magenta">{{ profit_factor_7d }}</div>
+        <div class="value mono {{ profit_factor_7d_class }}">{{ profit_factor_7d }}</div>
       </div>
       <div class="card">
         <div class="label">Fees 7d</div>
@@ -363,11 +363,11 @@ HTML_TEMPLATE = """
       </div>
       <div class="card">
         <div class="label">Win Rate 30d</div>
-        <div class="value mono magenta">{{ win_rate_30d }}</div>
+        <div class="value mono {{ win_rate_30d_class }}">{{ win_rate_30d }}</div>        
       </div>
       <div class="card">
         <div class="label">Profit Factor 30d</div>
-        <div class="value mono magenta">{{ profit_factor_30d }}</div>
+        <div class="value mono {{ profit_factor_30d_class }}">{{ profit_factor_30d }}</div>
       </div>
       <div class="card">
         <div class="label">Fees 30d</div>
@@ -541,6 +541,12 @@ def css_class(v):
         return "bad"
     return "neutral"
 
+def metric_threshold_class(v, threshold):
+    try:
+        x = float(v)
+    except Exception:
+        return "magenta"
+    return "good" if x >= threshold else "magenta"
 
 def position_text(position):
     if position == "LONG":
@@ -688,15 +694,21 @@ def dashboard():
         wins_count=wins_count,
         losses_count=losses_count,
         win_rate_24h=fmt_pct(summary.get("win_rate_24h", 0)),
+        win_rate_24h_class=metric_threshold_class((float(summary.get("win_rate_24h", 0) or 0) * 100), 45),
         profit_factor_24h=fmt_num(summary.get("profit_factor_24h", 0)),
+        profit_factor_24h_class=metric_threshold_class(summary.get("profit_factor_24h", 0), 1.5),
         fees_24h=fmt_signed_num(-(float(summary.get("fees_24h", 0) or 0)), f" {quote}"),
         closed_trades_7d=summary.get("closed_trades_7d", "-"),
         win_rate_7d=fmt_pct(summary.get("win_rate_7d")) if summary.get("win_rate_7d") is not None else "-",
+        win_rate_7d_class=metric_threshold_class((float(summary.get("win_rate_7d", 0) or 0) * 100), 45) if summary.get("win_rate_7d") is not None else "magenta",
         profit_factor_7d=fmt_num(summary.get("profit_factor_7d")) if summary.get("profit_factor_7d") is not None else "-",
+        profit_factor_7d_class=metric_threshold_class(summary.get("profit_factor_7d", 0), 1.5) if summary.get("profit_factor_7d") is not None else "magenta",
         fees_7d=fmt_signed_num(-(float(summary.get("fees_7d", 0) or 0)), f" {quote}") if summary.get("fees_7d") is not None else "-",
         closed_trades_30d=summary.get("closed_trades_30d", "-"),
         win_rate_30d=fmt_pct(summary.get("win_rate_30d")) if summary.get("win_rate_30d") is not None else "-",
+        win_rate_30d_class=metric_threshold_class((float(summary.get("win_rate_30d", 0) or 0) * 100), 45) if summary.get("win_rate_30d") is not None else "magenta",
         profit_factor_30d=fmt_num(summary.get("profit_factor_30d")) if summary.get("profit_factor_30d") is not None else "-",
+        profit_factor_30d_class=metric_threshold_class(summary.get("profit_factor_30d", 0), 1.5) if summary.get("profit_factor_30d") is not None else "magenta",
         fees_30d=fmt_signed_num(-(float(summary.get("fees_30d", 0) or 0)), f" {quote}") if summary.get("fees_30d") is not None else "-",
         bots=safe_bots,
         pnl_bars=pnl_bars,
@@ -711,4 +723,4 @@ def dashboard():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=10000)    
