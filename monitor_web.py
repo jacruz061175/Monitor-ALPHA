@@ -292,6 +292,12 @@ HTML_TEMPLATE = """
       font-weight: 600;
       font-size: 14px;
     }
+    .chart-year-bottom {
+      font-weight: 700;
+      font-size: 12px;
+      color: #374151;
+      margin-top: 4px;
+    }
     .chart-wrap {
       height: 220px;
       position: relative;
@@ -471,19 +477,19 @@ HTML_TEMPLATE = """
         <div class="bar-row">
           <div>Perdidas ({{ losses_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ losses_pct }}%;"></div></div>
-          <div class="mono magenta">{{ losses_pct_text }}</div>
+          <div class="mono magenta">{{ losses_pct_text }}</div>chart_dates.append(h["time"][:10])
         </div>
       </div>
     </div>
 
     <div class="chart-panel">
       <div class="chart-head">
-        <div class="chart-title">Evolución estimada (USDT)</div>
-        <div class="chart-year">{{ chart_year }}</div>
+        <div class="chart-title">Evolución Estimada (USDT)</div>
       </div>
       <div class="chart-wrap">
         <canvas id="equityChart"></canvas>
       </div>
+      <div class="chart-year-bottom">{{ chart_year }}</div>
     </div>
 
     <div class="footer">Auto refresh: 30 segundos</div>
@@ -520,7 +526,13 @@ HTML_TEMPLATE = """
         scales: {
           x: {
             grid: { color: '#eef2f7' },
-            ticks: { color: '#6b7280' }
+            ticks: {
+              color: '#6b7280',
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 6
+            }
           },
           y: {
             grid: { color: '#eef2f7' },
@@ -722,11 +734,16 @@ def dashboard():
 
             for h in history[-120:]:  # últimos 120 puntos
                 chart_values.append(h["balance"])
-                chart_dates.append(h["time"][:10])
+                try:
+                    dt = datetime.strptime(h["time"][:10], "%Y-%m-%d")
+                    chart_dates.append(dt.strftime("%m/%d"))
+                except Exception:
+                    dt = datetime.strptime(h["time"][:10], "%Y-%m-%d")
+                    chart_dates.append(dt.strftime("%m/%d"))
 
         except:
             chart_values = [bal]  
-            chart_dates = [now_dt.strftime("%d/%m")]
+            chart_dates = [now_dt.strftime("%m/%d")]
     else:
         chart_values = [bal]
         chart_dates = [now_dt.strftime("%d/%m")]
