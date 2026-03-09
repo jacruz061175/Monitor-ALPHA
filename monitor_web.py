@@ -424,15 +424,13 @@ HTML_TEMPLATE = """
         <tr>
           <th style="width:17%;">Moneda</th>
           <th style="width:10%;">PnL 24h</th>
-          <th style="width:10%;">PnL 7d</th>
-          <th style="width:10%;">PnL 30d</th>
           <th style="width:9%;">FEE24h</th>
           <th style="width:5%;">CT</th>
           <th style="width:5%;">WR</th>
           <th style="width:5%;">PF</th>
           <th style="width:6%;">AVG</th>
           <th style="width:8%;">Expectancy</th>
-          <th style="width:15%;">Última Operación</th>
+          <th style="width:15%;">Ultima Operación</th>
         </tr>
       </thead>
       <tbody>
@@ -450,8 +448,6 @@ HTML_TEMPLATE = """
             </div>
           </td>
           <td class="mono {{ bot.pnl_class }}">{{ bot.pnl_24h_text }}</td>
-          <td class="mono {{ bot.pnl_7d_class }}">{{ bot.pnl_7d_text }}</td>
-          <td class="mono {{ bot.pnl_30d_class }}">{{ bot.pnl_30d_text }}</td>
           <td class="mono magenta">{{ bot.fees_24h_text }}</td>
           <td class="mono">{{ bot.closed_trades_24h }}</td>
           <td class="mono {{ bot.win_rate_class }}">{{ bot.win_rate_text }}</td>
