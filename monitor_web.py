@@ -477,7 +477,7 @@ HTML_TEMPLATE = """
         <div class="bar-row">
           <div>Perdidas ({{ losses_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ losses_pct }}%;"></div></div>
-          <div class="mono magenta">{{ losses_pct_text }}</div>chart_dates.append(h["time"][:10])
+          <div class="mono magenta">{{ losses_pct_text }}</div>
         </div>
       </div>
     </div>
@@ -489,7 +489,6 @@ HTML_TEMPLATE = """
       <div class="chart-wrap">
         <canvas id="equityChart"></canvas>
       </div>
-      <div class="chart-year-bottom">{{ chart_year }}</div>
     </div>
 
     <div class="footer">Auto refresh: 30 segundos</div>
@@ -531,9 +530,17 @@ HTML_TEMPLATE = """
               maxRotation: 0,
               minRotation: 0,
               autoSkip: true,
-              maxTicksLimit: 6
+              maxTicksLimit: 6,
+              callback: function(value, index) {
+                const label = this.getLabelForValue(value);
+
+                if (index === 0) {
+                  return "{{ chart_year }}   " + label;
+                }
+
+                return label;
+              }
             }
-          },
           y: {
             grid: { color: '#eef2f7' },
             ticks: { color: '#6b7280' }
