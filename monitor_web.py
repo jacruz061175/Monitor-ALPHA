@@ -336,16 +336,15 @@ HTML_TEMPLATE = """
       font-weight: 700;
       font-size: 13px;
       text-align: center;
-      padding: 12px 8px;
-      border-bottom: 1px solid #e5e7eb;
+      border: 1px solid var(--line);
+      padding: 10px 8px;
     }
-
     .results-summary-table td {
-      padding: 12px 8px;
+      border: 1px solid #e5e7eb;
+      padding: 10px 8px;
       text-align: center;
       font-size: 14px;
       background: #ffffff;
-      border-bottom: 1px solid #f1f5f9;
     }
     .results-summary-table tbody tr:hover td {
       background: #fffaf0;
@@ -481,12 +480,7 @@ HTML_TEMPLATE = """
           <td>
             <div class="coin-cell">
               <img class="coin-logo" src="{{ bot.logo_url }}" alt="{{ bot.symbol }}">
-              <td>
-              <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-                <img src="{{ bot.logo_url }}" style="width:18px;height:18px;">
-                <strong>{{ bot.symbol }}</strong>
-              </div>
-</td>
+              <strong>{{ bot.symbol }}</strong>
             </div>
             <div class="coin-meta">
               <div class="mono muted">{{ bot.price_text }}</div>
