@@ -257,6 +257,13 @@ HTML_TEMPLATE = """
       margin-bottom: 14px;
       align-items: start;
     }
+    .results-panel{
+      min-width: 0;
+    }
+
+    .effectiveness-panel{
+      min-width: 300px;
+    }
     .mini-panel, .chart-panel {
       background: var(--panel-soft);
       border: 1px solid var(--line);
@@ -559,66 +566,53 @@ HTML_TEMPLATE = """
           </td>
         </tr>
         {% endfor %}
-      </tbody>
-    </table>
-</table>
-
-    <div class="table-block">
-
-    <table class="main-table results-table-bottom">
-
-    <thead>
-    <tr>
-    <th rowspan="2">Moneda</th>
-    <th colspan="3">Ganadas</th>
-    <th colspan="3">Perdidas</th>
-    </tr>
-
-    <tr>
-    <th>24h</th>
-    <th>7d</th>
-    <th>30d</th>
-    <th>24h</th>
-    <th>7d</th>
-    <th>30d</th>
-    </tr>
-
-    </thead>
-
-    <tbody>
-
-    {% for bot in bots %}
-    <tr>
-
-    <td>
-      <div class="coin-cell">
-        <img
-          src="https://cryptoicons.org/api/icon/{{ bot.symbol[:-4]|lower }}/32"
-          alt="{{ bot.symbol }}"
-          class="coin-icon"
-          onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft='0';"
-        >
-        <strong>{{ bot.symbol }}</strong>
-      </div>
-    </td>
-
-    <td class="mono">{{ bot.wins_24h }}</td>
-    <td class="mono">{{ bot.wins_7d }}</td>
-    <td class="mono">{{ bot.wins_30d }}</td>
-
-    <td class="mono">{{ bot.losses_24h }}</td>
-    <td class="mono">{{ bot.losses_7d }}</td>
-    <td class="mono">{{ bot.losses_30d }}</td>
-
-    </tr>
-    {% endfor %}
-
     </tbody>
     </table>
-
-    </div>
     <div class="panels-row">
-      <div class="mini-panel">
+      <div class="mini-panel results-panel">
+        <div class="mini-title">Resultados por moneda</div>
+        <table class="results-summary-table results-table-bottom">
+          <thead>
+            <tr>
+              <th rowspan="2">Moneda</th>
+              <th colspan="3">Ganadas</th>
+              <th colspan="3">Perdidas</th>
+            </tr>
+            <tr>
+              <th>24h</th>
+              <th>7d</th>
+              <th>30d</th>
+              <th>24h</th>
+              <th>7d</th>
+              <th>30d</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for bot in bots %}
+            <tr>
+              <td>
+                <div class="coin-cell">
+                  <img
+                    class="coin-logo"
+                    src="{{ bot.logo_url }}"
+                    alt="{{ bot.symbol }}"
+                    onerror="this.style.display='none'">
+                  <strong>{{ bot.symbol }}</strong>
+                </div>
+              </td>
+              <td class="mono">{{ bot.wins_24h }}</td>
+              <td class="mono">{{ bot.wins_7d }}</td>
+              <td class="mono">{{ bot.wins_30d }}</td>
+              <td class="mono">{{ bot.losses_24h }}</td>
+              <td class="mono">{{ bot.losses_7d }}</td>
+              <td class="mono">{{ bot.losses_30d }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mini-panel effectiveness-panel">
         <div class="mini-title">Efectividad 24h</div>
         <div class="bar-row">
           <div>Ganadas ({{ wins_count }})</div>
