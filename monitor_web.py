@@ -238,6 +238,17 @@ HTML_TEMPLATE = """
       background: #fdf4ff;
     }
     .muted { color: var(--muted); }
+
+    .col-compact {
+      text-align: center;
+    }
+    .col-metric {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+    .last-op {
+      line-height: 1.3;
+    }
     .panels-row {
       display: grid;
       gap: 14px;
@@ -422,15 +433,15 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:17%;">Moneda</th>
-          <th style="width:10%;">PnL 24h</th>
-          <th style="width:9%;">FEE24h</th>
-          <th style="width:5%;">CT</th>
-          <th style="width:5%;">WR</th>
-          <th style="width:5%;">PF</th>
-          <th style="width:6%;">AVG</th>
-          <th style="width:8%;">Expectancy</th>
-          <th style="width:15%;">Ultima Operación</th>
+          <th style="width:22%;">Moneda</th>
+          <th class="col-metric" style="width:12%;">PnL 24h</th>
+          <th class="col-metric" style="width:11%;">FEE24h</th>
+          <th class="col-compact" style="width:6%;">CT</th>
+          <th class="col-compact" style="width:6%;">WR</th>
+          <th class="col-compact" style="width:6%;">PF</th>
+          <th class="col-metric" style="width:8%;">AVG</th>
+          <th class="col-metric" style="width:10%;">Expectancy</th>
+          <th style="width:19%;">Ultima Operación</th>
         </tr>
       </thead>
       <tbody>
@@ -447,14 +458,14 @@ HTML_TEMPLATE = """
               <div>{{ bot.position_text }}</div>
             </div>
           </td>
-          <td class="mono {{ bot.pnl_class }}">{{ bot.pnl_24h_text }}</td>
-          <td class="mono magenta">{{ bot.fees_24h_text }}</td>
-          <td class="mono">{{ bot.closed_trades_24h }}</td>
-          <td class="mono {{ bot.win_rate_class }}">{{ bot.win_rate_text }}</td>
-          <td class="mono {{ bot.profit_factor_class }}">{{ bot.profit_factor_text }}</td>
-          <td class="mono {{ bot.avg_trade_class }}">{{ bot.avg_trade_text }}</td>
-          <td class="mono {{ bot.expectancy_class }}">{{ bot.expectancy_text }}</td>
-          <td>
+          <td class="mono col-metric {{ bot.pnl_class }}">{{ bot.pnl_24h_text }}</td>
+          <td class="mono col-metric magenta">{{ bot.fees_24h_text }}</td>
+          <td class="mono col-compact">{{ bot.closed_trades_24h }}</td>
+          <td class="mono col-compact {{ bot.win_rate_class }}">{{ bot.win_rate_text }}</td>
+          <td class="mono col-compact {{ bot.profit_factor_class }}">{{ bot.profit_factor_text }}</td>
+          <td class="mono col-metric {{ bot.avg_trade_class }}">{{ bot.avg_trade_text }}</td>
+          <td class="mono col-metric {{ bot.expectancy_class }}">{{ bot.expectancy_text }}</td>
+          <td class="last-op">
             {% if bot.last_trade and bot.last_trade.side %}
               <span class="pill">{{ bot.last_trade.side }}</span><br>
               <span class="muted">{{ bot.last_trade.time }}</span><br>
