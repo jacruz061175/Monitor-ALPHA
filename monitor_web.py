@@ -532,16 +532,7 @@ HTML_TEMPLATE = """
           <td>
             <div class="coin-cell">
               <img class="coin-logo" src="{{ bot.logo_url }}" alt="{{ bot.symbol }}">
-              <td>
-              <div class="coin-cell">
-                <img
-                  class="coin-icon"
-                  src="https://cryptoicons.org/api/icon/{{ bot.symbol[:-4]|lower }}/32"
-                  alt="{{ bot.symbol }}"
-                  onerror="this.style.display='none'">
-                <strong>{{ bot.symbol }}</strong>
-              </div>
-            </td>
+              <strong>{{ bot.symbol }}</strong>
             </div>
             <div class="coin-meta">
               <div class="mono muted">{{ bot.price_text }}</div>
