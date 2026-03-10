@@ -509,41 +509,56 @@ HTML_TEMPLATE = """
         {% endfor %}
       </tbody>
     </table>
+</table>
 
+    <div class="table-block">
+
+    <table class="results-summary-table">
+
+    <thead>
+    <tr>
+    <th rowspan="2">Moneda</th>
+    <th colspan="3">Ganadas</th>
+    <th colspan="3">Perdidas</th>
+    </tr>
+
+    <tr>
+    <th>24h</th>
+    <th>7d</th>
+    <th>30d</th>
+    <th>24h</th>
+    <th>7d</th>
+    <th>30d</th>
+    </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for bot in bots %}
+    <tr>
+
+    <td>
+    <img src="https://cryptoicons.org/api/icon/{{bot.symbol[:-4]|lower}}/32" style="width:18px;margin-right:6px;">
+    <strong>{{ bot.symbol }}</strong>
+    </td>
+
+    <td class="mono">{{ bot.wins_24h }}</td>
+    <td class="mono">{{ bot.wins_7d }}</td>
+    <td class="mono">{{ bot.wins_30d }}</td>
+
+    <td class="mono">{{ bot.losses_24h }}</td>
+    <td class="mono">{{ bot.losses_7d }}</td>
+    <td class="mono">{{ bot.losses_30d }}</td>
+
+    </tr>
+    {% endfor %}
+
+    </tbody>
+    </table>
+
+    </div>
     <div class="panels-row">
-      <div class="mini-panel">
-        <div class="mini-title">Resultados por moneda</div>
-        <table class="results-summary-table">
-          <thead>
-            <tr>
-              <th rowspan="2" style="width:16%;">Moneda</th>
-              <th colspan="3">Ganadas</th>
-              <th colspan="3">Perdidas</th>
-            </tr>
-            <tr>
-              <th>24h</th>
-              <th>7d</th>
-              <th>30d</th>
-              <th>24h</th>
-              <th>7d</th>
-              <th>30d</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for bot in bots %}
-            <tr>
-              <td><strong>{{ bot.symbol }}</strong></td>
-              <td class="mono">{{ bot.wins_24h }}</td>
-              <td class="mono">{{ bot.wins_7d }}</td>
-              <td class="mono">{{ bot.wins_30d }}</td>
-              <td class="mono">{{ bot.losses_24h }}</td>
-              <td class="mono">{{ bot.losses_7d }}</td>
-              <td class="mono">{{ bot.losses_30d }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
       <div class="mini-panel">
         <div class="mini-title">Efectividad 24h</div>
         <div class="bar-row">
