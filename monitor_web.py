@@ -1,12 +1,14 @@
 from flask import Flask, jsonify, request, render_template_string
 import json
 import os
+import csv
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
 HISTORY_FILE = "balance_history.json"
 STATE_FILE = "render_monitor_state.json"
+EQUITY_SNAPSHOTS_FILE = os.path.join("reports", "equity_snapshots.csv")
 HISTORY_FILE = "balance_history.json"
 MONITOR_TOKEN = os.getenv("MONITOR_TOKEN", "")
 
@@ -914,26 +916,39 @@ def dashboard():
     chart_values = []
     chart_dates = []
 
-    if os.path.exists(HISTORY_FILE):
+    if os.path.exists(EQUITY_SNAPSHOTS_FILE):
         try:
-            with open(HISTORY_FILE) as f:
-                history = json.load(f)
+            with open(EQUITY_SNAPSHOTS_FILE, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                rows = list(reader)
 
-            for h in history[-120:]:  # últimos 120 puntos
-                chart_values.append(h["balance"])
+            # últimos 120 puntos
+            for r in rows[-120:]:
                 try:
-                    dt = datetime.strptime(h["time"][:10], "%Y-%m-%d")
-                    chart_dates.append(dt.strftime("%m/%d"))
-                except Exception:
-                    dt = datetime.strptime(h["time"][:10], "%Y-%m-%d")
-                    chart_dates.append(dt.strftime("%m/%d"))
+                    balance = float(r.get("balance_estimated", 0) or 0)
+                    ts_row = (r.get("ts") or "").strip()
 
-        except:
-            chart_values = [bal]  
-            chart_dates = [now_dt.strftime("%m/%d")]
+                    chart_values.append(round(balance, 6))
+
+                    if ts_row:
+                        dt = datetime.strptime(ts_row, "%Y-%m-%d %H:%M:%S")
+                        chart_dates.append(dt.strftime("%m/%d %H:%M"))
+                    else:
+                        chart_dates.append(now_dt.strftime("%m/%d %H:%M"))
+
+                except Exception:
+                    continue
+
+            if not chart_values:
+                chart_values = [bal]
+                chart_dates = [now_dt.strftime("%m/%d %H:%M")]
+
+        except Exception:
+            chart_values = [bal]
+            chart_dates = [now_dt.strftime("%m/%d %H:%M")]
     else:
         chart_values = [bal]
-        chart_dates = [now_dt.strftime("%d/%m")]
+        chart_dates = [now_dt.strftime("%m/%d %H:%M")]
 
     return render_template_string(
         HTML_TEMPLATE,
