@@ -433,15 +433,15 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:22%;">Moneda</th>
-          <th class="col-metric" style="width:12%;">PnL 24h</th>
-          <th class="col-metric" style="width:11%;">FEE24h</th>
+          <th style="width:16%;">Moneda</th>
+          <th class="col-metric" style="width:14%;">PnL 24h</th>
+          <th class="col-metric" style="width:12%;">FEE24h</th>
           <th class="col-compact" style="width:6%;">CT</th>
           <th class="col-compact" style="width:6%;">WR</th>
           <th class="col-compact" style="width:6%;">PF</th>
-          <th class="col-metric" style="width:8%;">AVG</th>
-          <th class="col-metric" style="width:10%;">Expectancy</th>
-          <th style="width:19%;">Ultima Operación</th>
+          <th class="col-metric" style="width:10%;">AVG</th>
+          <th class="col-metric" style="width:12%;">Expectancy</th>
+          <th style="width:18%;">Ultima Operación</th>
         </tr>
       </thead>
       <tbody>
