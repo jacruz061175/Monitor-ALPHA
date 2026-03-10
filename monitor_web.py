@@ -340,14 +340,17 @@ HTML_TEMPLATE = """
       padding: 10px 8px;
     }
     .results-summary-table td {
-      border: 1px solid #e5e7eb;
-      padding: 10px 8px;
+      padding: 12px 10px;
       text-align: center;
       font-size: 14px;
-      background: #ffffff;
+      border-top: 1px solid var(--line);
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      background: var(--panel);
     }
     .results-summary-table tbody tr:hover td {
-      background: #fffaf0;
+      background: var(--panel-2);
     }
     .footer {
       margin-top: 12px;
@@ -367,6 +370,55 @@ HTML_TEMPLATE = """
       .grid-primary, .grid-secondary, .grid-tertiary, .grid-quaternary { grid-template-columns: 1fr; }
       .title { font-size: 24px; }
       .bar-row { grid-template-columns: 72px 1fr 78px; }
+    }
+    /* tabla resultados por moneda */
+
+    .results-table-bottom{
+      width:100%;
+      margin-top:18px;
+      border-collapse:separate;
+      border-spacing:0;
+      border-radius:14px;
+      overflow:hidden;
+      background:var(--panel);
+    }
+
+    .results-table-bottom thead th{
+      background:var(--head);
+      color:var(--text);
+      font-weight:600;
+      font-size:13px;
+      padding:10px 12px;
+      text-align:center;
+      border:none;
+    }
+
+    .results-table-bottom tbody td{
+      padding:12px;
+      text-align:center;
+      border-top:1px solid var(--line);
+      border-left:none;
+      border-right:none;
+      border-bottom:none;
+    }
+
+    .results-table-bottom tbody tr:hover td{
+      background:var(--panel-2);
+    }
+
+    .coin-cell{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .coin-icon{
+      width:18px;
+      height:18px;
+    }
+
+    .results-table-bottom .mono{
+      font-family:monospace;
     }
   </style>
 </head>
@@ -513,7 +565,7 @@ HTML_TEMPLATE = """
 
     <div class="table-block">
 
-    <table class="results-summary-table">
+    <table class="main-table results-table-bottom">
 
     <thead>
     <tr>
@@ -539,8 +591,15 @@ HTML_TEMPLATE = """
     <tr>
 
     <td>
-    <img src="https://cryptoicons.org/api/icon/{{bot.symbol[:-4]|lower}}/32" style="width:18px;margin-right:6px;">
-    <strong>{{ bot.symbol }}</strong>
+      <div class="coin-cell">
+        <img
+          src="https://cryptoicons.org/api/icon/{{ bot.symbol[:-4]|lower }}/32"
+          alt="{{ bot.symbol }}"
+          class="coin-icon"
+          onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft='0';"
+        >
+        <strong>{{ bot.symbol }}</strong>
+      </div>
     </td>
 
     <td class="mono">{{ bot.wins_24h }}</td>
