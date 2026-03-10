@@ -319,6 +319,36 @@ HTML_TEMPLATE = """
       height: 220px;
       position: relative;
     }
+
+    .results-summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: none;
+    }
+    .results-summary-table thead th {
+      background: #f3f4f6;
+      color: #374151;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: center;
+      border: 1px solid var(--line);
+      padding: 10px 8px;
+    }
+    .results-summary-table td {
+      border: 1px solid #e5e7eb;
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 14px;
+      background: #ffffff;
+    }
+    .results-summary-table tbody tr:hover td {
+      background: #fffaf0;
+    }
     .footer {
       margin-top: 12px;
       color: var(--muted);
@@ -482,14 +512,37 @@ HTML_TEMPLATE = """
 
     <div class="panels-row">
       <div class="mini-panel">
-        <div class="mini-title">PnL 24h por moneda</div>
-        {% for row in pnl_bars %}
-        <div class="bar-row">
-          <div>{{ row.symbol }}</div>
-          <div class="bar-track"><div class="bar-fill {{ row.bar_class }}" style="width: {{ row.width }}%;"></div></div>
-          <div class="mono magenta">{{ row.text }}</div>
-        </div>
-        {% endfor %}
+        <div class="mini-title">Resultados por moneda</div>
+        <table class="results-summary-table">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width:16%;">Moneda</th>
+              <th colspan="3">Ganadas</th>
+              <th colspan="3">Perdidas</th>
+            </tr>
+            <tr>
+              <th>24h</th>
+              <th>7d</th>
+              <th>30d</th>
+              <th>24h</th>
+              <th>7d</th>
+              <th>30d</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for bot in bots %}
+            <tr>
+              <td><strong>{{ bot.symbol }}</strong></td>
+              <td class="mono">{{ bot.wins_24h }}</td>
+              <td class="mono">{{ bot.wins_7d }}</td>
+              <td class="mono">{{ bot.wins_30d }}</td>
+              <td class="mono">{{ bot.losses_24h }}</td>
+              <td class="mono">{{ bot.losses_7d }}</td>
+              <td class="mono">{{ bot.losses_30d }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
       <div class="mini-panel">
         <div class="mini-title">Efectividad 24h</div>
@@ -707,8 +760,26 @@ def dashboard():
         avg_trade_24h = float(bot.get("avg_trade_24h", bot.get("avg_trade", 0)) or 0)
         expectancy_24h = float(bot.get("expectancy_24h", bot.get("expectancy", 0)) or 0)
 
+        closed_7d = int(bot.get("closed_trades_7d", 0) or 0)
+        closed_30d = int(bot.get("closed_trades_30d", 0) or 0)
+        win_rate_7d = float(bot.get("win_rate_7d", 0) or 0)
+        win_rate_30d = float(bot.get("win_rate_30d", 0) or 0)
+
+        wins_24h = round(closed_24h * win_rate_24h)
+        losses_24h = max(0, closed_24h - wins_24h)
+        wins_7d = round(closed_7d * win_rate_7d)
+        losses_7d = max(0, closed_7d - wins_7d)
+        wins_30d = round(closed_30d * win_rate_30d)
+        losses_30d = max(0, closed_30d - wins_30d)
+
         safe_bots.append({
             "symbol": bot.get("symbol", "-"),
+            "wins_24h": wins_24h,
+            "wins_7d": wins_7d,
+            "wins_30d": wins_30d,
+            "losses_24h": losses_24h,
+            "losses_7d": losses_7d,
+            "losses_30d": losses_30d,
             "logo_url": coin_logo_url(bot.get("symbol", "-")),
             "price_text": fmt_num(last_price) if last_price not in (None, "") else "-",
             "market_text": market_text(bot.get("regime")),
