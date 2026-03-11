@@ -294,19 +294,24 @@ HTML_TEMPLATE = """
       border: none;
       box-shadow: none;
       margin-top: -16px;
+      width: fit-content;
+      max-width: 100%;
     }
     .results-table-wrap{
-      width: 100%;
+      display: inline-block;
+      max-width: 100%;
       overflow-x: auto;
       overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
     }
     .results-summary-table{
+      width: auto;
       min-width: 760px;
     }
     .effectiveness-panel{
       min-width: 300px;
     }
-    .mini-panel, .chart-panel {
+    .mini-panel, .chart-panel { 
       background: var(--panel-soft);
       border: 1px solid var(--line);
       border-radius: 18px;
@@ -424,13 +429,15 @@ HTML_TEMPLATE = """
 
       table { display: block; overflow-x: auto; }
 
-      .results-panel {
-        width: 100%;
-        overflow: hidden;
-        margin-top: 0;
-      }
+    .results-panel {
+      width: auto;
+      max-width: 100%;
+      overflow: visible;
+      margin-top: 0;
+    }
 
       .results-table-wrap {
+        display: inline-block;
         width: 100%;
         overflow-x: auto;
         overflow-y: hidden;
