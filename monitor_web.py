@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 
 STATE_FILE = "render_monitor_state.json"
-EQUITY_SNAPSHOTS_FILE = os.path.join("reports", "equity_snapshots.csv")
+REPORTS_DIR = "reports"
+EQUITY_SNAPSHOTS_FILE = os.path.join(REPORTS_DIR, "equity_snapshots.csv")
 MONITOR_TOKEN = os.getenv("MONITOR_TOKEN", "")
 
 
@@ -24,6 +25,64 @@ def load_state():
 def save_state(payload: dict):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+
+def append_equity_snapshot_from_payload(payload):
+    os.makedirs(REPORTS_DIR, exist_ok=True)
+
+    file_exists = os.path.exists(EQUITY_SNAPSHOTS_FILE)
+
+    row = {
+        "ts": payload.get("timestamp", ""),
+        "quote": "USDT",
+        "balance_estimated": payload.get("balance_estimated", 0),
+        "pnl_24h": payload.get("pnl_24h", 0),
+        "pnl_7d": payload.get("pnl_7d", 0),
+        "pnl_30d": payload.get("pnl_30d", 0),
+        "fees_24h": payload.get("fees_24h", 0),
+        "closed_trades_24h": payload.get("closed_trades_24h", 0),
+        "win_rate_24h": payload.get("win_rate_24h", 0),
+        "profit_factor_24h": payload.get("profit_factor_24h", 0),
+    }
+
+    if not row["ts"]:
+        return
+    try:
+        if float(row["balance_estimated"] or 0) <= 0:
+            return
+    except Exception:
+        return
+    
+    if file_exists:
+        try:
+            with open(EQUITY_SNAPSHOTS_FILE, "r", encoding="utf-8", newline="") as f:
+                reader = csv.DictReader(f)
+                last_ts = None
+                for r in reader:
+                    last_ts = r.get("ts")
+                if last_ts == row["ts"]:
+                    return
+        except Exception:
+            pass
+
+    with open(EQUITY_SNAPSHOTS_FILE, "a", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "ts",
+                "quote",
+                "balance_estimated",
+                "pnl_24h",
+                "pnl_7d",
+                "pnl_30d",
+                "fees_24h",
+                "closed_trades_24h",
+                "win_rate_24h",
+                "profit_factor_24h",
+            ],
+        )
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(row)
         
 def token_ok(req) -> bool:
     if not MONITOR_TOKEN:
@@ -758,6 +817,7 @@ def update_monitor():
         return jsonify({"ok": False, "error": "invalid json"}), 400
 
     save_state(payload)
+    append_equity_snapshot_from_payload(payload)
 
     return jsonify({
     "ok": True,
@@ -884,21 +944,25 @@ def dashboard():
                 reader = csv.DictReader(f)
                 rows = list(reader)
 
-            for r in rows[-120:]:
+            daily_last = {}
+
+            for r in rows:
                 try:
                     balance = float(r.get("balance_estimated", 0) or 0)
                     ts_row = (r.get("ts") or "").strip()
 
-                    chart_values.append(round(balance, 6))
+                    if balance <= 0 or not ts_row:
+                        continue
 
-                    if ts_row:
-                        dt = datetime.strptime(ts_row, "%Y-%m-%d %H:%M:%S")
-                        chart_dates.append(dt.strftime("%m/%d"))
-                    else:
-                        chart_dates.append(now_dt.strftime("%m/%d"))
+                    day = ts_row[:10]  # YYYY-MM-DD
+                    daily_last[day] = balance
 
                 except Exception:
                     continue
+
+            for day in sorted(daily_last.keys())[-30:]:
+                chart_dates.append(day[5:])  # MM-DD
+                chart_values.append(round(daily_last[day], 6))
 
             if not chart_values:
                 chart_values = [bal]
@@ -910,7 +974,6 @@ def dashboard():
     else:
         chart_values = [bal]
         chart_dates = [now_dt.strftime("%m/%d")]
-
     return render_template_string(
         HTML_TEMPLATE,
         updated_at=state.get("timestamp") if isinstance(state, dict) else None,
