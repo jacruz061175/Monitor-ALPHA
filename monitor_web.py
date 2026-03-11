@@ -287,6 +287,11 @@ HTML_TEMPLATE = """
     }
     .results-panel{
       min-width: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      margin-top: -16px;
     }
 
     .effectiveness-panel{
@@ -298,6 +303,14 @@ HTML_TEMPLATE = """
       border-radius: 18px;
       padding: 18px;
       box-shadow: var(--shadow);
+    }
+    /* color de filas por performance */
+    .row-positive{
+      background: rgba(120, 255, 170, 0.10);
+    }
+
+    .row-negative{
+      background: rgba(255, 80, 200, 0.10);
     }
     .mini-title, .chart-title {
       font-size: 16px;
@@ -616,7 +629,7 @@ HTML_TEMPLATE = """
           </thead>
           <tbody>
             {% for bot in bots %}
-            <tr>
+            <tr class="{% if bot.wins_24h > bot.losses_24h %}row-positive{% elif bot.losses_24h > bot.wins_24h %}row-negative{% endif %}">
               <td>
                 <div class="coin-cell">
                   <img
