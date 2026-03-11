@@ -216,12 +216,13 @@ HTML_TEMPLATE = """
       table-layout: fixed;
     }
     thead th {
-      background: var(--head);
-      color: #374151;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.01em;
-      border-bottom: 1px solid var(--line);
+    background: var(--head);
+    color: #374151;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
     }
     th, td {
       padding: 12px 10px;
@@ -571,12 +572,12 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:12%;">Moneda</th>
+          <th style="width:10%;">Moneda</th>
           <th class="col-metric" style="width:12%;">PnL 24h</th>
           <th class="col-metric" style="width:12%;">FEE24h</th>
           <th class="col-compact" style="width:5%;">CT</th>
           <th class="col-compact" style="width:5%;">WR</th>
-          <th class="col-compact" style="width:7%;">PF</th>
+          <th class="col-compact" style="width:8%;">PF</th>
           <th class="col-metric col-avg" style="width:12%;">AVG</th>
           <th class="col-metric col-expectancy" style="width:12%;">Expectancy</th>
           <th style="width:12%;">Ultima Operación</th>
