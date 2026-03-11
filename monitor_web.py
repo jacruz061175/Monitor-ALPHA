@@ -293,7 +293,14 @@ HTML_TEMPLATE = """
       box-shadow: none;
       margin-top: -16px;
     }
-
+    .results-table-wrap{
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    .results-summary-table{
+      min-width: 760px;
+    }
     .effectiveness-panel{
       min-width: 300px;
     }
@@ -305,12 +312,12 @@ HTML_TEMPLATE = """
       box-shadow: var(--shadow);
     }
     /* color de filas por performance */
-    .row-positive{
-      background: rgba(120, 255, 170, 0.10);
+    .results-summary-table tr.row-positive td{
+      background: rgba(120,255,170,0.10);
     }
 
-    .row-negative{
-      background: rgba(255, 80, 200, 0.10);
+    .results-summary-table tr.row-negative td{
+      background: rgba(255,80,200,0.10);
     }
     .mini-title, .chart-title {
       font-size: 16px;
@@ -611,7 +618,8 @@ HTML_TEMPLATE = """
     </table>
     <div class="panels-row">
       <div class="results-panel">
-        <table class="results-summary-table results-table-bottom">
+        <div class="results-table-wrap">
+          <table class="results-summary-table results-table-bottom">
           <thead>
             <tr>
               <th rowspan="2">Moneda</th>
@@ -650,6 +658,7 @@ HTML_TEMPLATE = """
             {% endfor %}
           </tbody>
         </table>
+      </div>
       </div>
 
       <div class="mini-panel effectiveness-panel">
