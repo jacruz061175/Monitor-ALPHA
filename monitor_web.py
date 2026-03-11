@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-HISTORY_FILE = "balance_history.json"
 STATE_FILE = "render_monitor_state.json"
 EQUITY_SNAPSHOTS_FILE = os.path.join("reports", "equity_snapshots.csv")
 MONITOR_TOKEN = os.getenv("MONITOR_TOKEN", "")
@@ -25,37 +24,6 @@ def load_state():
 def save_state(payload: dict):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
-
-def save_balance_history(balance, timestamp):
-
-    if not timestamp:
-        return
-
-    today = timestamp[:10]  # YYYY-MM-DD
-    history = []
-
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-                history = json.load(f)
-        except:
-            history = []
-
-    # solo guardar un punto por día
-    for h in history:
-        if h.get("time", "")[:10] == today:
-            return
-
-    history.append({
-        "time": timestamp,
-        "balance": balance
-    })
-
-    # máximo 365 días de histórico
-    history = history[-365:]
-
-    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
         
 def token_ok(req) -> bool:
     if not MONITOR_TOKEN:
@@ -791,11 +759,6 @@ def update_monitor():
 
     save_state(payload)
 
-    save_balance_history(
-        payload.get("balance_estimated", 0),
-        payload.get("timestamp")
-    )
-
     return jsonify({
     "ok": True,
     "saved": True,
@@ -921,7 +884,6 @@ def dashboard():
                 reader = csv.DictReader(f)
                 rows = list(reader)
 
-            # últimos 120 puntos
             for r in rows[-120:]:
                 try:
                     balance = float(r.get("balance_estimated", 0) or 0)
@@ -931,23 +893,23 @@ def dashboard():
 
                     if ts_row:
                         dt = datetime.strptime(ts_row, "%Y-%m-%d %H:%M:%S")
-                        chart_dates.append(dt.strftime("%m/%d %H:%M"))
+                        chart_dates.append(dt.strftime("%m/%d"))
                     else:
-                        chart_dates.append(now_dt.strftime("%m/%d %H:%M"))
+                        chart_dates.append(now_dt.strftime("%m/%d"))
 
                 except Exception:
                     continue
 
             if not chart_values:
                 chart_values = [bal]
-                chart_dates = [now_dt.strftime("%m/%d %H:%M")]
+                chart_dates = [now_dt.strftime("%m/%d")]
 
         except Exception:
             chart_values = [bal]
-            chart_dates = [now_dt.strftime("%m/%d %H:%M")]
+            chart_dates = [now_dt.strftime("%m/%d")]
     else:
         chart_values = [bal]
-        chart_dates = [now_dt.strftime("%m/%d %H:%M")]
+        chart_dates = [now_dt.strftime("%m/%d")]
 
     return render_template_string(
         HTML_TEMPLATE,
