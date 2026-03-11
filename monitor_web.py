@@ -9,7 +9,6 @@ app = Flask(__name__)
 HISTORY_FILE = "balance_history.json"
 STATE_FILE = "render_monitor_state.json"
 EQUITY_SNAPSHOTS_FILE = os.path.join("reports", "equity_snapshots.csv")
-HISTORY_FILE = "balance_history.json"
 MONITOR_TOKEN = os.getenv("MONITOR_TOKEN", "")
 
 
