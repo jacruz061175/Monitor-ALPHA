@@ -271,8 +271,9 @@ HTML_TEMPLATE = """
       text-align: center;
     }
     .col-metric {
-      padding-left: 8px;
-      padding-right: 8px;
+      padding-left: 6px;
+      padding-right: 6px;
+      white-space: nowrap;
     }
     .last-op {
       line-height: 1.3;
@@ -571,14 +572,14 @@ HTML_TEMPLATE = """
       <thead>
         <tr>
           <th style="width:16%;">Moneda</th>
-          <th class="col-metric" style="width:14%;">PnL 24h</th>
-          <th class="col-metric" style="width:12%;">FEE24h</th>
-          <th class="col-compact" style="width:6%;">CT</th>
-          <th class="col-compact" style="width:6%;">WR</th>
-          <th class="col-compact" style="width:6%;">PF</th>
-          <th class="col-metric" style="width:10%;">AVG</th>
-          <th class="col-metric" style="width:12%;">Expectancy</th>
-          <th style="width:18%;">Ultima Operación</th>
+          <th class="col-metric" style="width:11%;">PnL 24h</th>
+          <th class="col-metric" style="width:10%;">FEE24h</th>
+          <th class="col-compact" style="width:5%;">CT</th>
+          <th class="col-compact" style="width:5%;">WR</th>
+          <th class="col-compact" style="width:5%;">PF</th>
+          <th class="col-metric col-avg" style="width:13%;">AVG</th>
+          <th class="col-metric col-expectancy" style="width:15%;">Expectancy</th>
+          <th style="width:20%;">Ultima Operación</th>
         </tr>
       </thead>
       <tbody>
