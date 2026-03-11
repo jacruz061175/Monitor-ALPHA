@@ -421,7 +421,35 @@ HTML_TEMPLATE = """
     @media (max-width: 860px) {
       body { padding: 14px; }
       .value { font-size: 20px; }
+
       table { display: block; overflow-x: auto; }
+
+      .results-panel {
+        width: 100%;
+        overflow: hidden;
+        margin-top: 0;
+      }
+
+      .results-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .results-summary-table {
+        min-width: 640px;
+      }
+
+      .results-table-bottom thead th {
+        font-size: 12px;
+        padding: 8px 8px;
+      }
+
+      .results-table-bottom tbody td {
+        font-size: 13px;
+        padding: 10px 8px;
+      }
     }
     @media (max-width: 560px) {
       .grid-primary, .grid-secondary, .grid-tertiary, .grid-quaternary { grid-template-columns: 1fr; }
