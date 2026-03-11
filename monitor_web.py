@@ -572,7 +572,7 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:10%;">Moneda</th>
+          <th style="width:11%;">Moneda</th>
           <th class="col-metric" style="width:12%;">PnL 24h</th>
           <th class="col-metric" style="width:12%;">FEE24h</th>
           <th class="col-compact" style="width:5%;">CT</th>
@@ -580,7 +580,7 @@ HTML_TEMPLATE = """
           <th class="col-compact" style="width:8%;">PF</th>
           <th class="col-metric col-avg" style="width:12%;">AVG</th>
           <th class="col-metric col-expectancy" style="width:12%;">Expectancy</th>
-          <th style="width:12%;">Ultima Operación</th>
+          <th style="width:13%;">Ultima Operación</th>
         </tr>
       </thead>
       <tbody>
