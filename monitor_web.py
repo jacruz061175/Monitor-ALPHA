@@ -385,6 +385,43 @@ HTML_TEMPLATE = """
       overflow: hidden;
       box-shadow: none;
     }
+    th:nth-child(2),
+    td:nth-child(2) {
+        width: 120px;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+        width: 120px;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+        width: 60px;
+    }
+
+    th:nth-child(5),
+    td:nth-child(5) {
+        width: 60px;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6) {
+        width: 70px;
+    }
+
+    th:nth-child(7),
+    td:nth-child(7) {
+        width: 90px;
+    }
+
+    th:nth-child(8),
+    td:nth-child(8) {
+        width: 90px;
+    }
+    td, th {
+    white-space: nowrap;
+    }
     .results-summary-table thead th {
       background: #f3f4f6;
       color: #374151;
