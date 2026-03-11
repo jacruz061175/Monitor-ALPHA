@@ -571,15 +571,15 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:14%;">Moneda</th>
-          <th class="col-metric" style="width:10%;">PnL 24h</th>
-          <th class="col-metric" style="width:10%;">FEE24h</th>
+          <th style="width:12%;">Moneda</th>
+          <th class="col-metric" style="width:12%;">PnL 24h</th>
+          <th class="col-metric" style="width:12%;">FEE24h</th>
           <th class="col-compact" style="width:5%;">CT</th>
           <th class="col-compact" style="width:5%;">WR</th>
           <th class="col-compact" style="width:7%;">PF</th>
-          <th class="col-metric col-avg" style="width:15%;">AVG</th>
-          <th class="col-metric col-expectancy" style="width:15%;">Expectancy</th>
-          <th style="width:15%;">Ultima Operación</th>
+          <th class="col-metric col-avg" style="width:12%;">AVG</th>
+          <th class="col-metric col-expectancy" style="width:12%;">Expectancy</th>
+          <th style="width:12%;">Ultima Operación</th>
         </tr>
       </thead>
       <tbody>
