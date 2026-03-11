@@ -597,8 +597,7 @@ HTML_TEMPLATE = """
     </tbody>
     </table>
     <div class="panels-row">
-      <div class="mini-panel results-panel">
-        <div class="mini-title">Resultados por moneda</div>
+      <div class="results-panel">
         <table class="results-summary-table results-table-bottom">
           <thead>
             <tr>
