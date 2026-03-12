@@ -1394,7 +1394,7 @@ def dashboard():
             "closed_trades_24h": closed_24h,
             "closed_trades_7d": closed_7d,
             "win_rate_text": fmt_pct(win_rate_24h),
-            "win_rate_class": metric_threshold_class(win_rate_24h * 100, 60),
+            "win_rate_class": metric_threshold_class(win_rate_24h * 100, 45),
             "win_rate_7d_text": f"{win_rate_7d_pct:.1f}%",
             "win_rate_7d_line_class": metric_threshold_class(win_rate_7d_pct, 45),
             "profit_factor_text": fmt_num(profit_factor_24h),
