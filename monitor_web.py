@@ -973,7 +973,7 @@ HTML_TEMPLATE = """
               ...qualityBaseOptions.scales,
               y: {
                 min: 0,
-                suggestedMax: Math.max(2, ...(bot.pf || [0])) + 0.5,
+                max: 3,
                 grid: { color: '#eef2f7' },
                 ticks: {
                   color: '#6b7280',
