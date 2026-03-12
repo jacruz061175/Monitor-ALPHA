@@ -414,6 +414,71 @@ HTML_TEMPLATE = """
     .results-summary-table tbody tr:hover td {
       background: var(--panel-2);
     }
+    .quality-section {
+      margin-top: 18px;
+    }
+    .quality-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .quality-card {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+    .quality-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .quality-coin {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .quality-coin strong {
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+    .quality-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .quality-stats .mono {
+      color: var(--text);
+    }
+    .quality-chart-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+    .quality-mini-chart {
+      min-width: 0;
+    }
+    .quality-mini-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .quality-mini-wrap {
+      height: 128px;
+      position: relative;
+    }
     .footer {
       margin-top: 12px;
       color: var(--muted);
@@ -422,6 +487,7 @@ HTML_TEMPLATE = """
     @media (max-width: 1100px) {
       .grid-primary, .grid-secondary, .grid-tertiary, .grid-quaternary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .panels-row { grid-template-columns: 1fr; }
+      .quality-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 860px) {
       body { padding: 14px; }
@@ -462,6 +528,9 @@ HTML_TEMPLATE = """
       .grid-primary, .grid-secondary, .grid-tertiary, .grid-quaternary { grid-template-columns: 1fr; }
       .title { font-size: 24px; }
       .bar-row { grid-template-columns: 72px 1fr 78px; }
+      .quality-grid { grid-template-columns: 1fr; }
+      .quality-chart-row { grid-template-columns: 1fr; }
+      .quality-mini-wrap { height: 118px; }
     }
     /* tabla resultados por moneda */
 
@@ -722,6 +791,48 @@ HTML_TEMPLATE = """
       </div>
     </div>
 
+    <div class="quality-section">
+      <div class="chart-panel">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Calidad de Trading por Moneda (7d)</div>
+            <div class="sub" style="margin-bottom:0;">Win Rate y Profit Factor por hora — últimos 7 días</div>
+          </div>
+        </div>
+        <div class="quality-grid">
+          {% for bot in bots %}
+          <div class="quality-card">
+            <div class="quality-card-head">
+              <div class="quality-coin">
+                <img class="coin-logo" src="{{ bot.logo_url }}" alt="{{ bot.symbol }}">
+                <strong>{{ bot.symbol }}</strong>
+              </div>
+              <div class="quality-stats">
+                <span>WR 7d: <span class="mono {{ bot.win_rate_7d_line_class }}">{{ bot.win_rate_7d_text }}</span></span>
+                <span>PF 7d: <span class="mono {{ bot.profit_factor_7d_line_class }}">{{ bot.profit_factor_7d_text }}</span></span>
+                <span>Trades: <span class="mono">{{ bot.closed_trades_7d }}</span></span>
+              </div>
+            </div>
+            <div class="quality-chart-row">
+              <div class="quality-mini-chart">
+                <div class="quality-mini-title">Win Rate (%)</div>
+                <div class="quality-mini-wrap">
+                  <canvas id="wrChart{{ loop.index0 }}"></canvas>
+                </div>
+              </div>
+              <div class="quality-mini-chart">
+                <div class="quality-mini-title">Profit Factor</div>
+                <div class="quality-mini-wrap">
+                  <canvas id="pfChart{{ loop.index0 }}"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
     <div class="footer">Auto refresh: 30 segundos</div>
   </div>
 
@@ -729,6 +840,7 @@ HTML_TEMPLATE = """
   <script>
     const labels = {{ chart_labels|safe }};
     const values = {{ chart_values|safe }};
+    const qualityCharts = {{ quality_charts|safe }};
     const ctx = document.getElementById('equityChart');
     new Chart(ctx, {
       type: 'line',
@@ -778,6 +890,101 @@ HTML_TEMPLATE = """
         }
       }
     });
+
+    const qualityBaseOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { intersect: false, mode: 'index' }
+      },
+      interaction: { intersect: false, mode: 'index' },
+      elements: {
+        line: { tension: 0.25, borderWidth: 2.2 },
+        point: { radius: 0, hoverRadius: 3 }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#6b7280',
+            autoSkip: true,
+            maxTicksLimit: 6,
+            maxRotation: 0,
+            minRotation: 0,
+            callback: function(value) {
+              const label = this.getLabelForValue(value) || '';
+              return label.split(' ')[0];
+            }
+          }
+        }
+      }
+    };
+
+    qualityCharts.forEach((bot, index) => {
+      const wrCanvas = document.getElementById(`wrChart${index}`);
+      const pfCanvas = document.getElementById(`pfChart${index}`);
+      if (wrCanvas) {
+        new Chart(wrCanvas, {
+          type: 'line',
+          data: {
+            labels: bot.labels,
+            datasets: [{
+              data: bot.wr,
+              borderColor: bot.wrColor,
+              backgroundColor: 'transparent',
+              fill: false
+            }]
+          },
+          options: {
+            ...qualityBaseOptions,
+            scales: {
+              ...qualityBaseOptions.scales,
+              y: {
+                min: 0,
+                max: 100,
+                grid: { color: '#eef2f7' },
+                ticks: {
+                  color: '#6b7280',
+                  callback: function(value) { return `${value}%`; },
+                  maxTicksLimit: 5
+                }
+              }
+            }
+          }
+        });
+      }
+      if (pfCanvas) {
+        new Chart(pfCanvas, {
+          type: 'line',
+          data: {
+            labels: bot.labels,
+            datasets: [{
+              data: bot.pf,
+              borderColor: bot.pfColor,
+              backgroundColor: 'transparent',
+              fill: false
+            }]
+          },
+          options: {
+            ...qualityBaseOptions,
+            scales: {
+              ...qualityBaseOptions.scales,
+              y: {
+                min: 0,
+                suggestedMax: Math.max(2, ...(bot.pf || [0])) + 0.5,
+                grid: { color: '#eef2f7' },
+                ticks: {
+                  color: '#6b7280',
+                  maxTicksLimit: 5
+                }
+              }
+            }
+          }
+        });
+      }
+    });
+
     setTimeout(() => window.location.reload(), 30000);
   </script>
 </body>
@@ -855,6 +1062,73 @@ def coin_logo_url(symbol: str) -> str:
     return mapping.get(base, f"https://cryptoicons.org/api/icon/{base}/32")
 
 
+def build_hourly_labels(hours=168):
+    now = datetime.now()
+    labels = []
+    for i in range(hours):
+        dt = now - timedelta(hours=(hours - 1 - i))
+        labels.append(dt.strftime("%m/%d %Hh"))
+    return labels
+
+
+def flat_series(value, hours=168):
+    try:
+        v = float(value or 0)
+    except Exception:
+        v = 0.0
+    return [round(v, 4)] * hours
+
+
+def normalize_series(values, hours=168):
+    if not isinstance(values, list):
+        return None
+    cleaned = []
+    for item in values[-hours:]:
+        try:
+            cleaned.append(round(float(item), 4))
+        except Exception:
+            cleaned.append(None)
+    if not cleaned:
+        return None
+    if len(cleaned) < hours:
+        pad_value = cleaned[0] if cleaned[0] is not None else 0.0
+        cleaned = ([pad_value] * (hours - len(cleaned))) + cleaned
+    return cleaned
+
+
+def extract_quality_series(bot, hours=168):
+    labels = (
+        bot.get("quality_labels_7d")
+        or bot.get("chart_labels_7d")
+        or bot.get("hourly_labels_7d")
+    )
+    wr_series = (
+        bot.get("win_rate_hourly_7d")
+        or bot.get("wr_hourly_7d")
+        or bot.get("hourly_win_rate_7d")
+    )
+    pf_series = (
+        bot.get("profit_factor_hourly_7d")
+        or bot.get("pf_hourly_7d")
+        or bot.get("hourly_profit_factor_7d")
+    )
+
+    history = bot.get("quality_history_7d") or bot.get("history_7d") or {}
+    if isinstance(history, dict):
+        labels = labels or history.get("labels")
+        wr_series = wr_series or history.get("win_rate") or history.get("wr")
+        pf_series = pf_series or history.get("profit_factor") or history.get("pf")
+
+    labels = labels[-hours:] if isinstance(labels, list) and labels else build_hourly_labels(hours)
+    if len(labels) < hours:
+        fallback = build_hourly_labels(hours)
+        labels = fallback[-hours:]
+
+    wr_series = normalize_series(wr_series, hours) or flat_series((bot.get("win_rate_7d", 0) or 0) * 100, hours)
+    pf_series = normalize_series(pf_series, hours) or flat_series(bot.get("profit_factor_7d", 0) or 0, hours)
+    return labels, wr_series, pf_series
+
+
 @app.route("/health")
 def health():
     return jsonify({"ok": True, "time": datetime.utcnow().isoformat() + "Z"})
@@ -922,6 +1196,8 @@ def dashboard():
         wins_30d = round(closed_30d * win_rate_30d)
         losses_30d = max(0, closed_30d - wins_30d)
 
+        quality_labels, quality_wr_series, quality_pf_series = extract_quality_series(bot)
+        win_rate_7d_pct = win_rate_7d * 100
         safe_bots.append({
             "symbol": bot.get("symbol", "-"),
             "wins_24h": wins_24h,
@@ -942,14 +1218,22 @@ def dashboard():
             "pnl_30d_class": css_class(pnl_30d),
             "fees_24h_text": fmt_signed_num(-fees_24h, f" {quote}"),
             "closed_trades_24h": closed_24h,
+            "closed_trades_7d": closed_7d,
             "win_rate_text": fmt_pct(win_rate_24h),
             "win_rate_class": metric_threshold_class(win_rate_24h * 100, 60),
+            "win_rate_7d_text": f"{win_rate_7d_pct:.1f}%",
+            "win_rate_7d_line_class": metric_threshold_class(win_rate_7d_pct, 45),
             "profit_factor_text": fmt_num(profit_factor_24h),
             "profit_factor_class": metric_threshold_class(profit_factor_24h, 1.5),
+            "profit_factor_7d_text": fmt_num(bot.get("profit_factor_7d", 0)),
+            "profit_factor_7d_line_class": metric_threshold_class(bot.get("profit_factor_7d", 0), 1.5),
             "avg_trade_text": fmt_signed_num(avg_trade_24h, f" {quote}"),
             "avg_trade_class": css_class(avg_trade_24h),
             "expectancy_text": fmt_signed_num(expectancy_24h, f" {quote}"),
             "expectancy_class": css_class(expectancy_24h),
+            "quality_labels": quality_labels,
+            "quality_wr_series": quality_wr_series,
+            "quality_pf_series": quality_pf_series,
             "last_trade": {
                 "side": last_trade.get("side"),
                 "time": last_trade.get("time", "-"),
@@ -1032,6 +1316,17 @@ def dashboard():
     else:
         chart_values = [bal]
         chart_dates = [now_dt.strftime("%m/%d")]
+    quality_charts = [
+        {
+            "labels": bot.get("quality_labels", []),
+            "wr": bot.get("quality_wr_series", []),
+            "pf": bot.get("quality_pf_series", []),
+            "wrColor": "#22c55e" if bot.get("win_rate_7d_line_class") == "good" else "#d946ef",
+            "pfColor": "#22c55e" if bot.get("profit_factor_7d_line_class") == "good" else "#d946ef",
+        }
+        for bot in safe_bots
+    ]
+
     return render_template_string(
         HTML_TEMPLATE,
         updated_at=state.get("timestamp") if isinstance(state, dict) else None,
@@ -1073,6 +1368,7 @@ def dashboard():
         chart_labels=json.dumps(chart_dates),
         chart_values=json.dumps(chart_values),
         chart_year=now_dt.strftime("%Y"),
+        quality_charts=json.dumps(quality_charts),
     )
 
 
