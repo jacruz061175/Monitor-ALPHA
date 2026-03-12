@@ -1180,9 +1180,11 @@ def extract_quality_series(bot, hours=168):
     if symbol and os.path.exists(SYMBOL_SUMMARY_FILE):
         try:
             hourly = {}
-            total_closed = 0
-            total_wins = 0
-            pf_values = []
+
+            latest_closed = 0
+            latest_wins = 0
+            latest_pf = 0.0
+            latest_ts = None
 
             with open(SYMBOL_SUMMARY_FILE, "r", encoding="utf-8", newline="") as f:
                 reader = csv.DictReader(f)
@@ -1216,10 +1218,6 @@ def extract_quality_series(bot, hours=168):
                     except Exception:
                         pf = 0.0
 
-                    total_closed += closed
-                    total_wins += wins
-                    pf_values.append(pf)
-
                     wr = 0.0 if closed <= 0 else round((wins / closed) * 100, 4)
 
                     hour_key = dt.strftime("%Y-%m-%d %H:00")
@@ -1229,13 +1227,22 @@ def extract_quality_series(bot, hours=168):
                         "pf": round(pf, 4),
                     }
 
+                    if latest_ts is None or dt > latest_ts:
+                        latest_ts = dt
+                        latest_closed = closed
+                        latest_wins = wins
+                        latest_pf = pf
+
             if hourly:
                 keys = sorted(hourly.keys())[-hours:]
                 labels = [hourly[k]["label"] for k in keys]
                 wr_series = [hourly[k]["wr"] for k in keys]
                 pf_series = [hourly[k]["pf"] for k in keys]
-                return labels, wr_series, pf_series
-            
+
+                wr_7d = 0.0 if latest_closed <= 0 else round((latest_wins / latest_closed) * 100, 1)
+
+                return labels, wr_series, pf_series, latest_closed, wr_7d, round(latest_pf, 6)
+
         except Exception:
             pass
 
@@ -1273,8 +1280,7 @@ def extract_quality_series(bot, hours=168):
     wr_7d = round(float(bot.get("win_rate_7d", 0) or 0) * 100, 1)
     pf_7d = round(float(bot.get("profit_factor_7d", 0) or 0), 6)
 
-    return labels, wr_series, pf_series
-
+    return labels, wr_series, pf_series, closed_7d, wr_7d, pf_7d
 
 @app.route("/health")
 def health():
@@ -1333,13 +1339,13 @@ def dashboard():
         avg_trade_24h = float(bot.get("avg_trade_24h", bot.get("avg_trade", 0)) or 0)
         expectancy_24h = float(bot.get("expectancy_24h", bot.get("expectancy", 0)) or 0)
 
-        quality_labels, quality_wr_series, quality_pf_series = extract_quality_series(bot)
+        quality_labels, quality_wr_series, quality_pf_series, closed_7d_csv, wr_7d_csv, pf_7d_csv = extract_quality_series(bot)
 
-        closed_7d = int(bot.get("closed_trades_7d", 0) or 0)
+        closed_7d = int(closed_7d_csv or 0)
         closed_30d = int(bot.get("closed_trades_30d", 0) or 0)
-        win_rate_7d = float(bot.get("win_rate_7d", 0) or 0)
+        win_rate_7d = float((wr_7d_csv or 0) / 100.0)
         win_rate_30d = float(bot.get("win_rate_30d", 0) or 0)
-        profit_factor_7d = float(bot.get("profit_factor_7d", 0) or 0)
+        profit_factor_7d = float(pf_7d_csv or 0)
 
         wins_24h = round(closed_24h * win_rate_24h)
         losses_24h = max(0, closed_24h - wins_24h)
