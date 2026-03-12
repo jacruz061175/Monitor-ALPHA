@@ -1005,15 +1005,8 @@ HTML_TEMPLATE = """
           type: 'line',
           data: {
             labels: bot.labels,
-            plugins: {
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return context.raw.toFixed(1) + ' %';
-                  }
-                }
-              }
-            }
+            datasets: [{
+              data: bot.wr,
               borderColor: bot.wrColor,
               backgroundColor: 'transparent',
               fill: false
