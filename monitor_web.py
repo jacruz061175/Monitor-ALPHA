@@ -9,7 +9,6 @@ app = Flask(__name__)
 STATE_FILE = "render_monitor_state.json"
 REPORTS_DIR = "reports"
 EQUITY_SNAPSHOTS_FILE = os.path.join(REPORTS_DIR, "equity_snapshots.csv")
-SYMBOL_SUMMARY_FILE = os.path.join(REPORTS_DIR, "symbol_summary_snapshots.csv")
 MONITOR_TOKEN = os.getenv("MONITOR_TOKEN", "")
 
 
@@ -84,93 +83,6 @@ def append_equity_snapshot_from_payload(payload):
         if not file_exists:
             writer.writeheader()
         writer.writerow(row)
-
-def append_symbol_summary_snapshots_from_payload(payload):
-    os.makedirs(REPORTS_DIR, exist_ok=True)
-
-    ts = (payload or {}).get("timestamp", "")
-    if not ts:
-        return
-
-    bots = (payload or {}).get("bots", [])
-    if not isinstance(bots, list) or not bots:
-        return
-
-    file_exists = os.path.exists(SYMBOL_SUMMARY_FILE)
-
-    existing_keys = set()
-    if file_exists:
-        try:
-            with open(SYMBOL_SUMMARY_FILE, "r", encoding="utf-8", newline="") as f:
-                reader = csv.DictReader(f)
-                for r in reader:
-                    existing_keys.add((r.get("ts", ""), r.get("symbol", "")))
-        except Exception:
-            existing_keys = set()
-
-    rows_to_write = []
-
-    for bot in bots:
-        if not isinstance(bot, dict):
-            continue
-
-        symbol = bot.get("symbol", "")
-        if not symbol:
-            continue
-
-        closed_7d = int(bot.get("closed_trades_7d", 0) or 0)
-        win_rate_7d = float(bot.get("win_rate_7d", 0) or 0)
-        wins_7d = round(closed_7d * win_rate_7d)
-
-        last_trade = bot.get("last_trade") or {}
-
-        key = (ts, symbol)
-        if key in existing_keys:
-            continue
-
-        rows_to_write.append({
-            "ts": ts,
-            "symbol": symbol,
-            "net24": float(bot.get("pnl_24h", 0) or 0),
-            "net7": float(bot.get("pnl_7d", 0) or 0),
-            "net30": float(bot.get("pnl_30d", 0) or 0),
-            "fee24": float(bot.get("fees_24h", 0) or 0),
-            "closed": closed_7d,
-            "wins": wins_7d,
-            "profit_factor": float(bot.get("profit_factor_7d", 0) or 0),
-            "avg_pnl": float(bot.get("avg_trade_7d", bot.get("avg_trade_24h", bot.get("avg_trade", 0))) or 0),
-            "last_trade_side": last_trade.get("side"),
-            "last_trade_time": last_trade.get("time"),
-            "last_trade_price": last_trade.get("price"),
-            "last_trade_qty": last_trade.get("qty"),
-        })
-
-    if not rows_to_write:
-        return
-
-    with open(SYMBOL_SUMMARY_FILE, "a", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(
-            f,
-            fieldnames=[
-                "ts",
-                "symbol",
-                "net24",
-                "net7",
-                "net30",
-                "fee24",
-                "closed",
-                "wins",
-                "profit_factor",
-                "avg_pnl",
-                "last_trade_side",
-                "last_trade_time",
-                "last_trade_price",
-                "last_trade_qty",
-            ],
-        )
-        if not file_exists:
-            writer.writeheader()
-        writer.writerows(rows_to_write)
         
 def token_ok(req) -> bool:
     if not MONITOR_TOKEN:
@@ -1002,8 +914,7 @@ HTML_TEMPLATE = """
             minRotation: 0,
             callback: function(value) {
               const label = this.getLabelForValue(value) || '';
-              return label.split(' ')[1] || label;
-            }
+              return label.split(' ')[0];
             }
           }
         }
@@ -1156,7 +1067,7 @@ def build_hourly_labels(hours=168):
     labels = []
     for i in range(hours):
         dt = now - timedelta(hours=(hours - 1 - i))
-        labels.append(dt.strftime("%m/%d %H:%M"))
+        labels.append(dt.strftime("%m/%d %Hh"))
     return labels
 
 
@@ -1239,7 +1150,6 @@ def update_monitor():
 
     save_state(payload)
     append_equity_snapshot_from_payload(payload)
-    append_symbol_summary_snapshots_from_payload(payload)
 
     return jsonify({
     "ok": True,
