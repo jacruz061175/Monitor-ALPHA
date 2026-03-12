@@ -1002,7 +1002,8 @@ HTML_TEMPLATE = """
             minRotation: 0,
             callback: function(value) {
               const label = this.getLabelForValue(value) || '';
-              return label.split(' ')[0];
+              return label.split(' ')[1] || label;
+            }
             }
           }
         }
@@ -1155,7 +1156,7 @@ def build_hourly_labels(hours=168):
     labels = []
     for i in range(hours):
         dt = now - timedelta(hours=(hours - 1 - i))
-        labels.append(dt.strftime("%m/%d %Hh"))
+        labels.append(dt.strftime("%m/%d %H:%M"))
     return labels
 
 
