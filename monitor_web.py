@@ -85,6 +85,81 @@ def append_equity_snapshot_from_payload(payload):
             writer.writeheader()
         writer.writerow(row)
         
+def append_symbol_summary_snapshots_from_payload(payload):
+    os.makedirs(REPORTS_DIR, exist_ok=True)
+
+    file_exists = os.path.exists(SYMBOL_SUMMARY_FILE)
+    ts = payload.get("timestamp", "")
+
+    if not ts:
+        return
+
+    bots = payload.get("bots", [])
+    if not isinstance(bots, list) or not bots:
+        return
+
+    existing_keys = set()
+    if file_exists:
+        try:
+            with open(SYMBOL_SUMMARY_FILE, "r", encoding="utf-8", newline="") as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    existing_keys.add(((r.get("ts") or "").strip(), (r.get("symbol") or "").strip().upper()))
+        except Exception:
+            pass
+
+    with open(SYMBOL_SUMMARY_FILE, "a", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "ts",
+                "symbol",
+                "closed",
+                "wins",
+                "profit_factor",
+            ],
+        )
+
+        if not file_exists:
+            writer.writeheader()
+
+        for bot in bots:
+            symbol = (bot.get("symbol") or "").strip().upper()
+            if not symbol:
+                continue
+
+            try:
+                closed = int(float(bot.get("closed_trades_7d", 0) or 0))
+            except Exception:
+                closed = 0
+
+            try:
+                win_rate_7d = float(bot.get("win_rate_7d", 0) or 0)
+            except Exception:
+                win_rate_7d = 0.0
+
+            try:
+                wins = int(round(closed * win_rate_7d))
+            except Exception:
+                wins = 0
+
+            try:
+                pf = float(bot.get("profit_factor_7d", 0) or 0)
+            except Exception:
+                pf = 0.0
+
+            dedupe_key = (ts, symbol)
+            if dedupe_key in existing_keys:
+                continue
+
+            writer.writerow({
+                "ts": ts,
+                "symbol": symbol,
+                "closed": closed,
+                "wins": wins,
+                "profit_factor": pf,
+            })
+
 def token_ok(req) -> bool:
     if not MONITOR_TOKEN:
         return True
@@ -977,7 +1052,7 @@ HTML_TEMPLATE = """
                 grid: { color: '#eef2f7' },
                 ticks: {
                   color: '#6b7280',
-                  maxTicksLimit: 5
+                  stepSize: 1
                 }
               }
             }
@@ -1227,6 +1302,7 @@ def update_monitor():
 
     save_state(payload)
     append_equity_snapshot_from_payload(payload)
+    append_symbol_summary_snapshots_from_payload(payload)
 
     return jsonify({
     "ok": True,
@@ -1261,11 +1337,14 @@ def dashboard():
         avg_trade_24h = float(bot.get("avg_trade_24h", bot.get("avg_trade", 0)) or 0)
         expectancy_24h = float(bot.get("expectancy_24h", bot.get("expectancy", 0)) or 0)
 
+        quality_labels, quality_wr_series, quality_pf_series, closed_7d_csv, wr_7d_csv, pf_7d_csv = extract_quality_series(bot)
+
         closed_7d = int(closed_7d_csv or 0)
         closed_30d = int(bot.get("closed_trades_30d", 0) or 0)
         win_rate_7d = float((wr_7d_csv or 0) / 100.0)
         win_rate_30d = float(bot.get("win_rate_30d", 0) or 0)
         profit_factor_7d = float(pf_7d_csv or 0)
+
         wins_24h = round(closed_24h * win_rate_24h)
         losses_24h = max(0, closed_24h - wins_24h)
         wins_7d = round(closed_7d * win_rate_7d)
@@ -1273,8 +1352,8 @@ def dashboard():
         wins_30d = round(closed_30d * win_rate_30d)
         losses_30d = max(0, closed_30d - wins_30d)
 
-        quality_labels, quality_wr_series, quality_pf_series, closed_7d_csv, wr_7d_csv, pf_7d_csv = extract_quality_series(bot)
         win_rate_7d_pct = win_rate_7d * 100
+
         safe_bots.append({
             "symbol": bot.get("symbol", "-"),
             "wins_24h": wins_24h,
