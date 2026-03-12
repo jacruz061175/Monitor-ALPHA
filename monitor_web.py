@@ -675,7 +675,7 @@ HTML_TEMPLATE = """
 
     <div class="grid-primary">
       <div class="card">
-        <div class="label">Balance Estimado</div>
+        <div class="label">Balance</div>
         <div class="value mono neutral">{{ balance }}</div>
       </div>
       <div class="card">
@@ -752,7 +752,7 @@ HTML_TEMPLATE = """
     <table>
       <thead>
         <tr>
-          <th style="width:11%;">Moneda</th>
+          <th style="width:11%;">Coin</th>
           <th class="col-metric" style="width:12%;">PnL 24h</th>
           <th class="col-metric" style="width:12%;">FEE24h</th>
           <th class="col-compact" style="width:5%;">CT</th>
@@ -760,7 +760,7 @@ HTML_TEMPLATE = """
           <th class="col-compact" style="width:8%;">PF</th>
           <th class="col-metric col-avg" style="width:12%;">AVG</th>
           <th class="col-metric col-expectancy" style="width:12%;">Expectancy</th>
-          <th style="width:13%;">Ultima Operación</th>
+          <th style="width:13%;">Last Transaction</th>
         </tr>
       </thead>
       <tbody>
@@ -804,9 +804,9 @@ HTML_TEMPLATE = """
           <table class="results-summary-table results-table-bottom">
           <thead>
             <tr>
-              <th rowspan="2">Moneda</th>
-              <th colspan="3">Ganadas</th>
-              <th colspan="3">Perdidas</th>
+              <th rowspan="2">Coin</th>
+              <th colspan="3">Win</th>
+              <th colspan="3">Loss</th>
             </tr>
             <tr>
               <th>24h</th>
@@ -844,7 +844,7 @@ HTML_TEMPLATE = """
       </div>
 
       <div class="mini-panel effectiveness-panel">
-        <div class="mini-title">Efectividad 24h</div>
+        <div class="mini-title">Performance 24h</div>
         <div class="bar-row">
           <div>Ganadas ({{ wins_count }})</div>
           <div class="bar-track"><div class="bar-fill" style="width: {{ wins_pct }}%;"></div></div>
@@ -860,7 +860,7 @@ HTML_TEMPLATE = """
 
     <div class="chart-panel">
       <div class="chart-head">
-        <div class="chart-title">Evolución Estimada (USDT)</div>
+        <div class="chart-title">Balance USDT</div>
       </div>
       <div class="chart-wrap">
         <canvas id="equityChart"></canvas>
@@ -871,8 +871,8 @@ HTML_TEMPLATE = """
       <div class="chart-panel">
         <div class="chart-head">
           <div>
-            <div class="chart-title">Calidad de Trading por Moneda (7d)</div>
-            <div class="sub" style="margin-bottom:0;">Win Rate y Profit Factor por hora — últimos 7 días</div>
+            <div class="chart-title">Performance Coin</div>
+            <div class="sub" style="margin-bottom:0;">Win Rate - Profit Factor --> hour last 7d</div>
           </div>
         </div>
         <div class="quality-grid">
