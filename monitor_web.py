@@ -990,7 +990,7 @@ HTML_TEMPLATE = """
             minRotation: 0,
             callback: function(value) {
               const label = this.getLabelForValue(value) || '';
-              return label.split(' ')[1] || label;
+              return label.split(' ')[0].replace('/', '-') || label;
             }
           }
         }
@@ -1048,7 +1048,7 @@ HTML_TEMPLATE = """
               ...qualityBaseOptions.scales,
               y: {
                 min: 0,
-                max: 3,
+                max: 4,
                 grid: { color: '#eef2f7' },
                 ticks: {
                   color: '#6b7280',
