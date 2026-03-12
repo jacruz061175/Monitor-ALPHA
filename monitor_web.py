@@ -1302,7 +1302,7 @@ def dashboard():
                 except Exception:
                     continue
 
-            for day in sorted(daily_last.keys())[-30:]:
+            for day in sorted(daily_last.keys())[-365:]:
                 chart_dates.append(day[5:])  # MM-DD
                 chart_values.append(round(daily_last[day], 6))
 
