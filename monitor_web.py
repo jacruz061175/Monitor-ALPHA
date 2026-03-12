@@ -1333,7 +1333,7 @@ def dashboard():
         avg_trade_24h = float(bot.get("avg_trade_24h", bot.get("avg_trade", 0)) or 0)
         expectancy_24h = float(bot.get("expectancy_24h", bot.get("expectancy", 0)) or 0)
 
-        quality_labels, quality_wr_series, quality_pf_series, closed_7d_csv, wr_7d_csv, pf_7d_csv = extract_quality_series(bot)
+        quality_labels, quality_wr_series, quality_pf_series = extract_quality_series(bot)
 
         closed_7d = int(bot.get("closed_trades_7d", 0) or 0)
         closed_30d = int(bot.get("closed_trades_30d", 0) or 0)
