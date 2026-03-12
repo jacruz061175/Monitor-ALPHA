@@ -1186,6 +1186,11 @@ def extract_quality_series(bot, hours=168):
             latest_pf = 0.0
             latest_ts = None
 
+            latest_valid_closed = 0
+            latest_valid_wins = 0
+            latest_valid_pf = 0.0
+            latest_valid_ts = None
+
             with open(SYMBOL_SUMMARY_FILE, "r", encoding="utf-8", newline="") as f:
                 reader = csv.DictReader(f)
 
@@ -1233,15 +1238,26 @@ def extract_quality_series(bot, hours=168):
                         latest_wins = wins
                         latest_pf = pf
 
+                    if closed > 0 or pf > 0:
+                        if latest_valid_ts is None or dt > latest_valid_ts:
+                            latest_valid_ts = dt
+                            latest_valid_closed = closed
+                            latest_valid_wins = wins
+                            latest_valid_pf = pf
+
             if hourly:
                 keys = sorted(hourly.keys())[-hours:]
                 labels = [hourly[k]["label"] for k in keys]
                 wr_series = [hourly[k]["wr"] for k in keys]
                 pf_series = [hourly[k]["pf"] for k in keys]
 
-                wr_7d = 0.0 if latest_closed <= 0 else round((latest_wins / latest_closed) * 100, 1)
+                closed_for_header = latest_valid_closed if latest_valid_ts is not None else latest_closed
+                wins_for_header = latest_valid_wins if latest_valid_ts is not None else latest_wins
+                pf_for_header = latest_valid_pf if latest_valid_ts is not None else latest_pf
 
-                return labels, wr_series, pf_series, latest_closed, wr_7d, round(latest_pf, 6)
+                wr_7d = 0.0 if closed_for_header <= 0 else round((wins_for_header / closed_for_header) * 100, 1)
+
+                return labels, wr_series, pf_series, closed_for_header, wr_7d, round(pf_for_header, 6)
 
         except Exception:
             pass
