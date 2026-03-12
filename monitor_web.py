@@ -9,6 +9,7 @@ app = Flask(__name__)
 STATE_FILE = "render_monitor_state.json"
 REPORTS_DIR = "reports"
 EQUITY_SNAPSHOTS_FILE = os.path.join(REPORTS_DIR, "equity_snapshots.csv")
+SYMBOL_SUMMARY_FILE = os.path.join(REPORTS_DIR, "symbol_summary_snapshots.csv")
 MONITOR_TOKEN = os.getenv("MONITOR_TOKEN", "")
 
 
@@ -1078,25 +1079,86 @@ def flat_series(value, hours=168):
         v = 0.0
     return [round(v, 4)] * hours
 
-
 def normalize_series(values, hours=168):
     if not isinstance(values, list):
         return None
+
     cleaned = []
     for item in values[-hours:]:
         try:
             cleaned.append(round(float(item), 4))
         except Exception:
             cleaned.append(None)
+
     if not cleaned:
         return None
+
     if len(cleaned) < hours:
         pad_value = cleaned[0] if cleaned[0] is not None else 0.0
         cleaned = ([pad_value] * (hours - len(cleaned))) + cleaned
+
     return cleaned
 
-
 def extract_quality_series(bot, hours=168):
+    symbol = (bot.get("symbol") or "").strip().upper()
+
+    # 1) Intentar leer desde reports/symbol_summary_snapshots.csv
+    if symbol and os.path.exists(SYMBOL_SUMMARY_FILE):
+        try:
+            hourly = {}
+
+            with open(SYMBOL_SUMMARY_FILE, "r", encoding="utf-8", newline="") as f:
+                reader = csv.DictReader(f)
+
+                for r in reader:
+                    row_symbol = (r.get("symbol") or "").strip().upper()
+                    if row_symbol != symbol:
+                        continue
+
+                    ts_row = (r.get("ts") or "").strip()
+                    if not ts_row:
+                        continue
+
+                    try:
+                        dt = datetime.strptime(ts_row, "%Y-%m-%d %H:%M:%S")
+                    except Exception:
+                        continue
+
+                    try:
+                        closed = int(float(r.get("closed", 0) or 0))
+                    except Exception:
+                        closed = 0
+
+                    try:
+                        wins = int(float(r.get("wins", 0) or 0))
+                    except Exception:
+                        wins = 0
+
+                    try:
+                        pf = float(r.get("profit_factor", 0) or 0)
+                    except Exception:
+                        pf = 0.0
+
+                    wr = 0.0 if closed <= 0 else round((wins / closed) * 100, 4)
+
+                    hour_key = dt.strftime("%Y-%m-%d %H:00")
+                    hourly[hour_key] = {
+                        "label": dt.strftime("%m/%d %Hh"),
+                        "wr": wr,
+                        "pf": round(pf, 4),
+                    }
+
+            if hourly:
+                keys = sorted(hourly.keys())[-hours:]
+                labels = [hourly[k]["label"] for k in keys]
+                wr_series = [hourly[k]["wr"] for k in keys]
+                pf_series = [hourly[k]["pf"] for k in keys]
+                return labels, wr_series, pf_series
+
+        except Exception:
+            pass
+
+    # 2) Fallback: seguir usando lo que venga en el payload/state
     labels = (
         bot.get("quality_labels_7d")
         or bot.get("chart_labels_7d")
