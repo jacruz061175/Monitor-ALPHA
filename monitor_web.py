@@ -953,7 +953,7 @@ HTML_TEMPLATE = """
               callback: function(value, index) {
                 const label = this.getLabelForValue(value);
                 if (index === 0) {
-                  return "{{ chart_year }}   " + label;
+                  return ["{{ chart_year }}", label];
                 }
                 return label;
               }
