@@ -914,7 +914,7 @@ HTML_TEMPLATE = """
             minRotation: 0,
             callback: function(value) {
               const label = this.getLabelForValue(value) || '';
-              return label.split(' ')[0];
+              return label.split(' ')[1] || label;
             }
           }
         }
