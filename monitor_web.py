@@ -989,35 +989,34 @@ HTML_TEMPLATE = """
             minRotation: 0,
             callback: function(value, index) {
               const label = this.getLabelForValue(value) || '';
-              const day = label.split(' ')[0].replace('/', '-');
+              const day = label.split(' ')[0].replace('/', '-') || label;
 
-              const labels = this.chart.data.labels || [];
-              const total = labels.length;
-              if (total === 0) return day;
+              const total = this.chart.data.labels.length;
+              if (total <= 1) return day;
 
               const lastIndex = total - 1;
+              const step = Math.max(1, Math.floor(total / 4));
 
-              const positions = [
-                0,
-                Math.round(lastIndex * 0.33),
-                Math.round(lastIndex * 0.66),
-                lastIndex
-              ];
-
-              const normalizedPositions = [...new Set(
-                positions.map(p => Math.max(0, Math.min(lastIndex, p)))
-              )];
-
-              if (!normalizedPositions.includes(index)) {
-                return '';
+              if (index === 0) {
+                return day;
               }
 
-              return day;
+              if (index === lastIndex) {
+                return day;
+              }
+
+              if (index % step === 0 && index < lastIndex - 1) {
+                return day;
+              }
+
+              return '';
             }
           }
         }
-      } 
-      qualityCharts.forEach((bot, index) => {
+      }
+    };
+
+    qualityCharts.forEach((bot, index) => {
       const wrCanvas = document.getElementById(`wrChart${index}`);
       const pfCanvas = document.getElementById(`pfChart${index}`);
       if (wrCanvas) {
