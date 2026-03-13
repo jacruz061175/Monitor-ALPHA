@@ -872,7 +872,7 @@ HTML_TEMPLATE = """
         <div class="chart-head">
           <div>
             <div class="chart-title">Performance Coin</div>
-            <div class="sub" style="margin-bottom:0;">Win Rate - Profit Factor     🕒 7d / h</div>
+            <div class="sub" style="margin-bottom:0;">Win Rate - Profit Factor          🕒 7d / h</div>
           </div>
         </div>
         <div class="quality-grid">
