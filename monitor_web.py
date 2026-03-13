@@ -980,6 +980,7 @@ HTML_TEMPLATE = """
       },
       scales: {
         x: {
+          offset: true,
           grid: { display: false },
           ticks: {
             color: '#6b7280',
