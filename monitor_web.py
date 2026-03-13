@@ -984,38 +984,29 @@ HTML_TEMPLATE = """
           grid: { display: false },
           ticks: {
             color: '#6b7280',
-            autoSkip: false,
+            autoSkip: true,
+            maxTicksLimit: 6,
             maxRotation: 0,
             minRotation: 0,
             callback: function(value, index) {
+              const labels = this.chart.data.labels || [];
               const label = this.getLabelForValue(value) || '';
-              const day = label.split(' ')[0].replace('/', '-') || label;
+              const day = label.split(' ')[0].replace(/\//g, '-') || label;
 
-              const total = this.chart.data.labels.length;
-              if (total <= 1) return day;
-
-              const lastIndex = total - 1;
-              const step = Math.max(1, Math.floor(total / 4));
-
-              if (index === 0) {
-                return day;
+              if (index > 0) {
+                const prevLabel = labels[index - 1] || '';
+                const prevDay = prevLabel.split(' ')[0].replace(/\//g, '-') || prevLabel;
+                if (day === prevDay) {
+                  return '';
+                }
               }
 
-              if (index === lastIndex) {
-                return day;
-              }
-
-              if (index % step === 0 && index < lastIndex - 1) {
-                return day;
-              }
-
-              return '';
+              return day;
             }
           }
         }
       }
     };
-
     qualityCharts.forEach((bot, index) => {
       const wrCanvas = document.getElementById(`wrChart${index}`);
       const pfCanvas = document.getElementById(`pfChart${index}`);
