@@ -917,20 +917,8 @@ HTML_TEMPLATE = """
     const labels = {{ chart_labels|safe }};
     const values = {{ chart_values|safe }};
     const qualityCharts = {{ quality_charts|safe }};
-    const yearPlugin = {
-      id: 'yearPlugin',
-      afterDraw(chart) {
-        const {ctx, chartArea:{left,bottom}} = chart;
-        ctx.save();
-        ctx.fillStyle = '#111827';
-        ctx.font = 'bold 12px Inter';
-        ctx.fillText('{{ chart_year }}', left - 40, bottom + 20);
-        ctx.restore();
-      }
-    };
     const ctx = document.getElementById('equityChart');
     new Chart(ctx, {
-      plugins: [yearPlugin],
       type: 'line',
       data: {
         labels: labels,
@@ -944,7 +932,7 @@ HTML_TEMPLATE = """
           pointRadius: 3,
           pointHoverRadius: 4,
           pointBackgroundColor: '#f59e0b',
-          pointBorderWidth: 0
+          pointBorderColor: '#f59e0b'
         }]
       },
       options: {
