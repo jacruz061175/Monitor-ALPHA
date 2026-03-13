@@ -946,10 +946,23 @@ HTML_TEMPLATE = """
             grid: { color: '#eef2f7' },
             ticks: {
               color: '#6b7280',
+              autoSkip: false,
               maxRotation: 0,
               minRotation: 0,
-              autoSkip: true,
-              maxTicksLimit: 6,
+              callback: function(value, index, ticks) {
+                const label = this.getLabelForValue(value) || '';
+                const day = label.split(' ')[0].replace('/', '-');
+
+                if (
+                  index === 0 ||
+                  index === ticks.length - 1 ||
+                  index % Math.ceil(ticks.length / 5) === 0
+                ) {
+                  return day;
+                }
+                return '';
+              }
+            }
               callback: function(value, index) {
                 const label = this.getLabelForValue(value);
                 if (index === 0) {
@@ -988,9 +1001,16 @@ HTML_TEMPLATE = """
             maxTicksLimit: 6,
             maxRotation: 0,
             minRotation: 0,
-            callback: function(value) {
+            callback: function(value, index, ticks) {
               const label = this.getLabelForValue(value) || '';
-              return label.split(' ')[0].replace('/', '-') || label;
+              const day = label.split(' ')[0].replace('/', '-');
+
+              if (index === ticks.length - 1) {
+                return day;
+              }
+
+              return day;
+            }
             }
           }
         }
