@@ -984,6 +984,7 @@ HTML_TEMPLATE = """
           grid: { display: false },
           ticks: {
             color: '#6b7280',
+            align: 'inner',
             autoSkip: false,
             maxTicksLimit: 6,
             maxRotation: 0,
