@@ -983,7 +983,7 @@ HTML_TEMPLATE = """
           grid: { display: false },
           ticks: {
             color: '#6b7280',
-            autoSkip: true,
+            autoSkip: false,
             maxTicksLimit: 6,
             maxRotation: 0,
             minRotation: 0,
