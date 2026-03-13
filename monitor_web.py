@@ -989,33 +989,42 @@ HTML_TEMPLATE = """
             minRotation: 0,
             callback: function(value, index) {
               const label = this.getLabelForValue(value) || '';
-              const day = label.split(' ')[0].replace('/', '-') || label;
+              const day = label.split(' ')[0].replace('/', '-');
 
-              const total = this.chart.data.labels.length;
-              if (total <= 1) return day;
+              const labels = this.chart.data.labels || [];
+              const total = labels.length;
+              if (total === 0) return day;
 
+              const firstIndex = 0;
               const lastIndex = total - 1;
-              const step = Math.max(1, Math.floor(total / 4));
 
-              if (index === 0) {
-                return day;
+              const positions = new Set([
+                firstIndex,
+                Math.round((lastIndex) * 1 / 6),
+                Math.round((lastIndex) * 2 / 6),
+                Math.round((lastIndex) * 3 / 6),
+                Math.round((lastIndex) * 4 / 6),
+                Math.round((lastIndex) * 5 / 6),
+                lastIndex
+              ]);
+
+              if (!positions.has(index)) {
+                return '';
               }
 
-              if (index === lastIndex) {
-                return day;
+              const prevLabel = index > 0 ? (labels[index - 1] || '') : '';
+              const prevDay = prevLabel.split(' ')[0].replace('/', '-');
+
+              if (index > 0 && day === prevDay) {
+                return '';
               }
 
-              if (index % step === 0 && index < lastIndex - 1) {
-                return day;
-              }
-
-              return '';
+              return day;
             }
           }
         }
       }
     };
-
     qualityCharts.forEach((bot, index) => {
       const wrCanvas = document.getElementById(`wrChart${index}`);
       const pfCanvas = document.getElementById(`pfChart${index}`);
