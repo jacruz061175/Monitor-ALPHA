@@ -872,7 +872,7 @@ HTML_TEMPLATE = """
         <div class="chart-head">
           <div>
             <div class="chart-title">Performance Coin</div>
-            <div class="sub" style="margin-bottom:0;">Win Rate - Profit Factor --> hour last 7d</div>
+            <div class="sub" style="margin-bottom:0;">Win Rate - Profit Factor → histórico horario 7d</div>
           </div>
         </div>
         <div class="quality-grid">
