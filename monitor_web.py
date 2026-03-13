@@ -997,9 +997,18 @@ HTML_TEMPLATE = """
               const lastIndex = total - 1;
               const step = Math.max(1, Math.floor(total / 4));
 
-              if (index === 0 || index === lastIndex || index % step === 0) {
+              if (index === 0) {
                 return day;
               }
+
+              if (index === lastIndex) {
+                return day;
+              }
+
+              if (index % step === 0 && index < lastIndex - 1) {
+                return day;
+              }
+
               return '';
             }
           }
