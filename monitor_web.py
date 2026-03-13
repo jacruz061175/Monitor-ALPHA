@@ -966,7 +966,6 @@ HTML_TEMPLATE = """
         }
       }
     });
-
     const qualityBaseOptions = {
       responsive: true,
       maintainAspectRatio: false,
@@ -989,19 +988,17 @@ HTML_TEMPLATE = """
             maxRotation: 0,
             minRotation: 0,
             callback: function(value, index) {
+
               const labels = this.chart.data.labels || [];
+              const total = labels.length;
+
               const label = this.getLabelForValue(value) || '';
-              const day = label.split(' ')[0].replace(/\//g, '-') || label;
+              const day = label.split(' ')[0].replace(/\//g, '-');
 
-              if (index > 0) {
-                const prevLabel = labels[index - 1] || '';
-                const prevDay = prevLabel.split(' ')[0].replace(/\//g, '-') || prevLabel;
-                if (day === prevDay) {
-                  return '';
-                }
-              }
+              if (index === 0) return day;
+              if (index === total - 1) return day;
 
-              return day;
+              return '';
             }
           }
         }
