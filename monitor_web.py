@@ -995,27 +995,20 @@ HTML_TEMPLATE = """
               const total = labels.length;
               if (total === 0) return day;
 
-              const firstIndex = 0;
               const lastIndex = total - 1;
 
-              const positions = new Set([
-                firstIndex,
-                Math.round((lastIndex) * 1 / 6),
-                Math.round((lastIndex) * 2 / 6),
-                Math.round((lastIndex) * 3 / 6),
-                Math.round((lastIndex) * 4 / 6),
-                Math.round((lastIndex) * 5 / 6),
+              const positions = [
+                0,
+                Math.round(lastIndex * 0.33),
+                Math.round(lastIndex * 0.66),
                 lastIndex
-              ]);
+              ];
 
-              if (!positions.has(index)) {
-                return '';
-              }
+              const normalizedPositions = [...new Set(
+                positions.map(p => Math.max(0, Math.min(lastIndex, p)))
+              )];
 
-              const prevLabel = index > 0 ? (labels[index - 1] || '') : '';
-              const prevDay = prevLabel.split(' ')[0].replace('/', '-');
-
-              if (index > 0 && day === prevDay) {
+              if (!normalizedPositions.includes(index)) {
                 return '';
               }
 
@@ -1023,9 +1016,8 @@ HTML_TEMPLATE = """
             }
           }
         }
-      }
-    };
-    qualityCharts.forEach((bot, index) => {
+      } 
+      qualityCharts.forEach((bot, index) => {
       const wrCanvas = document.getElementById(`wrChart${index}`);
       const pfCanvas = document.getElementById(`pfChart${index}`);
       if (wrCanvas) {
