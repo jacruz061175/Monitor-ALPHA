@@ -872,7 +872,7 @@ HTML_TEMPLATE = """
         <div class="chart-head">
           <div>
             <div class="chart-title">Performance Coin</div>
-            <div class="sub" style="margin-bottom:0;">Win Rate - Profit Factor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🕒 7d / h</div>
+            <div class="sub" style="margin-bottom:0;">Win Rate - Profit Factor&nbsp;&nbsp;&nbsp;&nbsp;🕒 7d / h</div>
           </div>
         </div>
         <div class="quality-grid">
@@ -1057,7 +1057,7 @@ HTML_TEMPLATE = """
               ...qualityBaseOptions.scales,
               y: {
                 min: 0,
-                max: 8,
+                max: 7,
                 grid: { color: '#eef2f7' },
                 ticks: {
                   color: '#6b7280',
@@ -1184,92 +1184,7 @@ def normalize_series(values, hours=168):
     return cleaned
 
 def extract_quality_series(bot, hours=168):
-    symbol = (bot.get("symbol") or "").strip().upper()
 
-    if symbol and os.path.exists(SYMBOL_SUMMARY_FILE):
-        try:
-            hourly = {}
-
-            latest_closed = 0
-            latest_wins = 0
-            latest_pf = 0.0
-            latest_ts = None
-
-            latest_valid_closed = 0
-            latest_valid_wins = 0
-            latest_valid_pf = 0.0
-            latest_valid_ts = None
-
-            with open(SYMBOL_SUMMARY_FILE, "r", encoding="utf-8", newline="") as f:
-                reader = csv.DictReader(f)
-
-                for r in reader:
-                    row_symbol = (r.get("symbol") or "").strip().upper()
-                    if row_symbol != symbol:
-                        continue
-
-                    ts_row = (r.get("ts") or "").strip()
-                    if not ts_row:
-                        continue
-
-                    try:
-                        dt = datetime.strptime(ts_row, "%Y-%m-%d %H:%M:%S")
-                    except Exception:
-                        continue
-
-                    try:
-                        closed = int(float(r.get("closed", 0) or 0))
-                    except Exception:
-                        closed = 0
-
-                    try:
-                        wins = int(float(r.get("wins", 0) or 0))
-                    except Exception:
-                        wins = 0
-
-                    try:
-                        pf = float(r.get("profit_factor", 0) or 0)
-                    except Exception:
-                        pf = 0.0
-
-                    wr = 0.0 if closed <= 0 else round((wins / closed) * 100, 4)
-
-                    hour_key = dt.strftime("%Y-%m-%d %H:00")
-                    hourly[hour_key] = {
-                        "label": dt.strftime("%m/%d %Hh"),
-                        "wr": wr,
-                        "pf": round(pf, 4),
-                    }
-
-                    if latest_ts is None or dt > latest_ts:
-                        latest_ts = dt
-                        latest_closed = closed
-                        latest_wins = wins
-                        latest_pf = pf
-
-                    if closed > 0 or pf > 0:
-                        if latest_valid_ts is None or dt > latest_valid_ts:
-                            latest_valid_ts = dt
-                            latest_valid_closed = closed
-                            latest_valid_wins = wins
-                            latest_valid_pf = pf
-
-            if hourly:
-                keys = sorted(hourly.keys())[-hours:]
-                labels = [hourly[k]["label"] for k in keys]
-                wr_series = [hourly[k]["wr"] for k in keys]
-                pf_series = [hourly[k]["pf"] for k in keys]
-
-                closed_for_header = latest_valid_closed if latest_valid_ts is not None else latest_closed
-                wins_for_header = latest_valid_wins if latest_valid_ts is not None else latest_wins
-                pf_for_header = latest_valid_pf if latest_valid_ts is not None else latest_pf
-
-                wr_7d = 0.0 if closed_for_header <= 0 else round((wins_for_header / closed_for_header) * 100, 1)
-
-                return labels, wr_series, pf_series, closed_for_header, wr_7d, round(pf_for_header, 6)
-
-        except Exception:
-            pass
 
     labels = (
         bot.get("quality_labels_7d")
@@ -1292,6 +1207,21 @@ def extract_quality_series(bot, hours=168):
         labels = labels or history.get("labels")
         wr_series = wr_series or history.get("win_rate") or history.get("wr")
         pf_series = pf_series or history.get("profit_factor") or history.get("pf")
+
+    if isinstance(labels, list) and labels:
+      labels = labels[-hours:] if len(labels) > hours else labels
+      if len(labels) < hours:
+          fallback = build_hourly_labels(hours)
+          labels = fallback[-hours:]
+
+      wr_series = normalize_series(wr_series, hours) or flat_series((bot.get("win_rate_7d", 0) or 0) * 100, hours)
+      pf_series = normalize_series(pf_series, hours) or flat_series(bot.get("profit_factor_7d", 0) or 0, hours)
+
+      closed_7d = int(bot.get("closed_trades_7d", 0) or 0)
+      wr_7d = round(float(bot.get("win_rate_7d", 0) or 0) * 100, 1)
+      pf_7d = round(float(bot.get("profit_factor_7d", 0) or 0), 6)
+
+      return labels, wr_series, pf_series, closed_7d, wr_7d, pf_7d    
 
     labels = labels[-hours:] if isinstance(labels, list) and labels else build_hourly_labels(hours)
     if len(labels) < hours:
@@ -1329,7 +1259,6 @@ def update_monitor():
 
     save_state(payload)
     append_equity_snapshot_from_payload(payload)
-    append_symbol_summary_snapshots_from_payload(payload)
 
     return jsonify({
     "ok": True,
