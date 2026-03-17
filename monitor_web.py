@@ -1057,7 +1057,7 @@ HTML_TEMPLATE = """
               ...qualityBaseOptions.scales,
               y: {
                 min: 0,
-                max: 7,
+                max: 3,
                 grid: { color: '#eef2f7' },
                 ticks: {
                   color: '#6b7280',
