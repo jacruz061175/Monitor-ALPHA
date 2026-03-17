@@ -948,8 +948,7 @@ HTML_TEMPLATE = """
               color: '#6b7280',
               maxRotation: 0,
               minRotation: 0,
-              autoSkip: true,
-              maxTicksLimit: 6,
+              autoSkip: false,
               callback: function(value, index) {
                 const label = this.getLabelForValue(value);
                 if (index === 0) {
@@ -958,12 +957,6 @@ HTML_TEMPLATE = """
                 return label;
               }
             }
-          },
-          y: {
-            grid: { color: '#eef2f7' },
-            ticks: { color: '#6b7280' }
-          }
-        }
       }
     });
     const qualityBaseOptions = {
@@ -985,8 +978,8 @@ HTML_TEMPLATE = """
           ticks: {
             color: '#6b7280',
             align: 'inner',
-            autoSkip: false,
-            maxTicksLimit: 6,
+            autoSkip: true,
+            maxTicksLimit: 14,
             maxRotation: 0,
             minRotation: 0,
             callback: function(value, index) {
